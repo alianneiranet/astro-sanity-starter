@@ -40,6 +40,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.SubcomposeAsyncImage
 import com.jailbreakchecker.app.data.Guide
 import com.jailbreakchecker.app.data.Status
 
@@ -104,7 +106,7 @@ fun GuideScreen(
                 Text(guide.summary, style = MaterialTheme.typography.bodyLarge)
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    if (guide.updatedAt.isNotBlank()) "Revisada por IA ${relativeTime(guide.updatedAt)} en las fuentes oficiales." else if (reviewedAt.isNotBlank()) "Verificada en las fuentes oficiales el ${reviewedAt.split("-").reversed().joinToString("/")}." else "Versión incluida en la app.",
+                    if (guide.origin == "importada") "Importada desde JSON ${relativeTime(guide.updatedAt)}." else if (guide.updatedAt.isNotBlank()) "Revisada por IA ${relativeTime(guide.updatedAt)} en las fuentes oficiales." else if (reviewedAt.isNotBlank()) "Verificada en las fuentes oficiales el ${reviewedAt.split("-").reversed().joinToString("/")}." else "Versión incluida en la app.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -157,6 +159,27 @@ fun GuideScreen(
                             Text(step.title, style = MaterialTheme.typography.titleMedium)
                             Spacer(Modifier.height(4.dp))
                             Text(step.text, style = MaterialTheme.typography.bodyMedium)
+                            if (step.image.isNotBlank()) {
+                                Spacer(Modifier.height(10.dp))
+                                SubcomposeAsyncImage(
+                                    model = step.image,
+                                    contentDescription = step.imageCaption.ifBlank { step.title },
+                                    contentScale = ContentScale.FillWidth,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(12.dp)),
+                                    loading = { Text("Cargando imagen…", style = MaterialTheme.typography.bodySmall) },
+                                    error = { Text("No se pudo cargar la imagen.", style = MaterialTheme.typography.bodySmall) },
+                                )
+                                if (step.imageCaption.isNotBlank()) {
+                                    Text(
+                                        step.imageCaption,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(top = 4.dp),
+                                    )
+                                }
+                            }
                         }
                     }
                 }

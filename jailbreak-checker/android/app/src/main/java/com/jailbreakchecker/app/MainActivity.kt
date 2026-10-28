@@ -19,6 +19,7 @@ import com.jailbreakchecker.app.ui.BrandScreen
 import com.jailbreakchecker.app.ui.ConsoleScreen
 import com.jailbreakchecker.app.ui.GuideScreen
 import com.jailbreakchecker.app.ui.HomeScreen
+import com.jailbreakchecker.app.ui.ImportDialog
 import com.jailbreakchecker.app.ui.LocalLogoIds
 import com.jailbreakchecker.app.ui.SettingsScreen
 import com.jailbreakchecker.app.ui.theme.JailbreakTheme
@@ -56,6 +57,9 @@ private fun AppNavigation(viewModel: MainViewModel) {
     val guides = guideList.associateBy { it.id }
     val updatingGuides = running.filter { it.startsWith("guide:") }.map { it.removePrefix("guide:") }.toSet()
 
+    val importState by viewModel.importState.collectAsStateWithLifecycle()
+    ImportDialog(importState, onConfirm = { viewModel.confirmImport() }, onDismiss = { viewModel.dismissImport() })
+
     NavHost(navController = nav, startDestination = "home") {
         composable("home") {
             HomeScreen(
@@ -66,6 +70,8 @@ private fun AppNavigation(viewModel: MainViewModel) {
                 guides = guideList,
                 updatingGuides = updatingGuides,
                 onUpdateAllGuides = viewModel::updateAllGuides,
+                prompt = { viewModel.promptFor(null) },
+                onImportText = { viewModel.previewImport(it) },
                 hasApiKey = settings.hasApiKey,
                 searching = "scan" in running,
                 onBrand = { nav.navigate("brand/$it") },
@@ -96,6 +102,8 @@ private fun AppNavigation(viewModel: MainViewModel) {
                 onBack = { nav.popBackStack() },
                 onGuide = { nav.navigate("guide/$it") },
                 onReview = { viewModel.reviewNow(consoleId) },
+                prompt = { viewModel.promptFor(consoleId) },
+                onImportText = { viewModel.previewImport(it) },
             )
         }
         composable("guide/{guideId}") { entry ->

@@ -76,9 +76,15 @@ class Repository(private val context: Context) {
             else -> JsonPrimitive(value.toString())
         }
 
-        /** An AI rewrite wins only if it is newer than the review of the guides shipped with the app. */
-        fun mergeGuides(bundled: List<Guide>, state: LocalState, bundledReviewedAt: String = ""): List<Guide> =
-            bundled.map { base -> state.guides[base.id]?.takeIf { it.updatedAt > bundledReviewedAt } ?: base }
+        /**
+         * A rewritten guide wins only if it is newer than the review of the guides shipped with the app.
+         * Imported guides with new ids are added at the end.
+         */
+        fun mergeGuides(bundled: List<Guide>, state: LocalState, bundledReviewedAt: String = ""): List<Guide> {
+            val ids = bundled.map { it.id }.toSet()
+            val merged = bundled.map { base -> state.guides[base.id]?.takeIf { it.updatedAt > bundledReviewedAt } ?: base }
+            return merged + state.guides.values.filter { it.id !in ids }.sortedBy { it.title }
+        }
 
         /**
          * An AI-updated console wins only while it is newer than the bundled one, so a new

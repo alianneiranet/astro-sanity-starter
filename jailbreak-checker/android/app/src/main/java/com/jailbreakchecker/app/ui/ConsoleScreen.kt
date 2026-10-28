@@ -75,6 +75,8 @@ fun ConsoleScreen(
     onBack: () -> Unit,
     onGuide: (String) -> Unit,
     onReview: () -> Unit,
+    prompt: () -> String = { "" },
+    onImportText: (String) -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -216,8 +218,38 @@ fun ConsoleScreen(
                 }
             }
 
+            val related = guides.values.filter { console.id in it.consoleIds }
+            if (related.isNotEmpty()) {
+                item { Text("Guías para esta consola", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp)) }
+                items(related, key = { "g-" + it.id }) { g ->
+                    Card(
+                        onClick = { onGuide(g.id) },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                    ) {
+                        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.AutoMirrored.Outlined.MenuBook, null, tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.width(12.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text(g.title, style = MaterialTheme.typography.bodyLarge)
+                                if (g.origin == "importada") {
+                                    Text("Importada", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             if (console.sources.isNotEmpty()) {
                 item { SourcesCard(console) }
+            }
+            item {
+                ImportCard(
+                    title = "Actualizar con otra IA (gratis)",
+                    description = "Copia el prompt y pégalo en ChatGPT, Gemini o Claude con búsqueda web. Luego copia su respuesta (JSON) y pulsa Pegar, o guárdala como archivo .json. La app detecta la consola, valida los datos y actualiza estado y guías (con imágenes).",
+                    prompt = prompt,
+                    onImportText = onImportText,
+                )
             }
             if (hasApiKey) {
                 item {

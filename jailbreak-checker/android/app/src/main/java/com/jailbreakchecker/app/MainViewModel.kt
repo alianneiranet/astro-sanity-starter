@@ -103,5 +103,49 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
     }
 
+    private val _import = kotlinx.coroutines.flow.MutableStateFlow<com.jailbreakchecker.app.ui.ImportState>(com.jailbreakchecker.app.ui.ImportState.Idle)
+    val importState: StateFlow<com.jailbreakchecker.app.ui.ImportState> = _import
+
+    fun promptFor(consoleId: String?): String {
+        val all = consoles.value
+        return com.jailbreakchecker.app.data.ImportPrompt.build(all.firstOrNull { it.id == consoleId }, guides.value, all)
+    }
+
+    fun previewImport(text: String) = viewModelScope.launch {
+        if (text.isBlank()) {
+            _import.value = com.jailbreakchecker.app.ui.ImportState.Failed("El portapapeles o el archivo está vacío. Copia primero la respuesta de la IA.")
+            return@launch
+        }
+        _import.value = withContext(Dispatchers.Default) {
+            runCatching {
+                com.jailbreakchecker.app.data.Importer.preview(
+                    text,
+                    consoles.value,
+                    guides.value,
+                    java.io.File(getApplication<Application>().filesDir, "import-images"),
+                )
+            }.fold(
+                { com.jailbreakchecker.app.ui.ImportState.Ready(it) },
+                { com.jailbreakchecker.app.ui.ImportState.Failed(it.message ?: "Error desconocido") },
+            )
+        }
+    }
+
+    fun confirmImport() = viewModelScope.launch {
+        val ready = _import.value as? com.jailbreakchecker.app.ui.ImportState.Ready ?: return@launch
+        com.jailbreakchecker.app.data.Importer.apply(LocalStore.get(getApplication()), ready.preview)
+        val p = ready.preview
+        _import.value = com.jailbreakchecker.app.ui.ImportState.Done(
+            listOfNotNull(
+                p.consoleUpdate?.let { "Estado de ${it.name} actualizado." },
+                if (p.guides.isNotEmpty()) "${p.guides.size} guía(s) importada(s): las verás en la pestaña Guías y en la consola." else null,
+            ).joinToString("\n"),
+        )
+    }
+
+    fun dismissImport() {
+        _import.value = com.jailbreakchecker.app.ui.ImportState.Idle
+    }
+
     fun clearAiData() = viewModelScope.launch { LocalStore.get(getApplication()).clear() }
 }

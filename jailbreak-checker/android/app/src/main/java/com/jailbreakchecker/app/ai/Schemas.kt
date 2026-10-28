@@ -354,6 +354,7 @@ fun Schemas.parseGuideUpdate(input: JsonElement, current: com.jailbreakchecker.a
             warnings = strings("warnings", 10),
             links = links.ifEmpty { current.links },
             updatedAt = now,
+            origin = "ia",
         ),
     )
 }

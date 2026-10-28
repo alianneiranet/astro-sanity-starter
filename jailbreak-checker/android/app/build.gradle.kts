@@ -13,8 +13,8 @@ android {
         applicationId = "com.jailbreakchecker.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "3.0.0"
+        versionCode = 4
+        versionName = "3.2.0"
     }
 
     signingConfigs {
@@ -104,6 +104,8 @@ dependencies {
     // SVG console logos
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
     implementation("io.coil-kt.coil3:coil-svg:3.3.0")
+    // Guide step images from https links
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.16.1")

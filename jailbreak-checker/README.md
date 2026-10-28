@@ -60,6 +60,18 @@ Con 5 US$ y Haiku tienes para unos 8 días de revisión diaria o 2 actualizacion
 
 Cada respuesta de la IA se valida antes de guardarse (versiones en orden, cada modelo cubierto, solo enlaces https y guías con pasos completos). Si algo no cuadra, se conservan los datos anteriores.
 
+## Actualizar con cualquier IA (gratis) e importar JSON
+
+Si no quieres pagar la API, puedes usar el chat gratuito de **ChatGPT, Gemini, Claude o Copilot** (con búsqueda web):
+
+1. Dentro de una consola, en **"Actualizar con otra IA (gratis)"**, pulsa **Copiar prompt**. El prompt ya incluye los datos actuales de esa consola, sus modelos y sus guías. En la pestaña Guías hay uno general: escribe el nombre de la consola donde indica. También está en [`docs/PROMPT_IA.md`](docs/PROMPT_IA.md).
+2. Pégalo en la IA. Investiga en las fuentes oficiales y responde **solo con un JSON** en el formato `revisor-jailbreak/1`. Hay un ejemplo en [`docs/ejemplo-importacion.json`](docs/ejemplo-importacion.json).
+3. Copia la respuesta y pulsa **Pegar**, o guárdala como `.json` y pulsa **Archivo .json**. Aunque la IA añada texto o el bloque ```json, la app encuentra el JSON igualmente.
+4. La app **detecta la consola** (por `consoleId`, por el nombre o por palabras clave como "PS5" o "Switch 2"). Valida los datos con las mismas reglas que la IA interna y muestra una **vista previa** antes de guardar: estado, guías, número de imágenes y avisos.
+5. Las guías pueden llevar **imágenes en cada paso**: enlaces `https` directos o imágenes incrustadas en base64 (`data:image/png;base64,…`), que se guardan en el teléfono.
+
+Lo que falte en el JSON se queda como estaba. Por ejemplo, si solo trae el resumen y el último firmware, se conservan los rangos. Las guías con ids nuevos se añaden, y las que tienen un id existente se sustituyen.
+
 ## Conseguir el APK
 
 - **GitHub Actions**: cada push que toca `jailbreak-checker/` compila la app. En **Actions → Jailbreak Checker**, descarga el artefacto `revisor-jailbreak-apk` e instala `app-release.apk` (hay que permitir "instalar apps desconocidas").

@@ -1,0 +1,174 @@
+{
+  "format": "revisor-jailbreak/1",
+  "consoleId": "switch1",
+  "consoleName": "Nintendo Switch (1)",
+  "checkedAt": "2026-10-29",
+  "console": {
+    "summary": {
+      "status": "green",
+      "text": "V1 sin parche: sí. V2, Lite y OLED: solo con modchip"
+    },
+    "latestFirmware": "23.0.1",
+    "mode": "firmware",
+    "allVersions": null,
+    "variants": [
+      {
+        "id": "unpatched",
+        "allVersions": {
+          "status": "green",
+          "title": "Jailbreak con cualquier firmware",
+          "explanation": "El fallo RCM está en el hardware: funciona con cualquier firmware que soporten Atmosphère y hekate (hasta la 23.0.1).",
+          "method": "RCM + hekate + Atmosphère",
+          "guideId": "switch-rcm"
+        }
+      },
+      {
+        "id": "patched_v1",
+        "allVersions": null
+      },
+      {
+        "id": "mariko",
+        "allVersions": {
+          "status": "orange",
+          "title": "Solo con modchip (hay que abrirla)",
+          "explanation": "Ningún firmware tiene hackeo por software en estos modelos. Hay que soldar un modchip Picofly.",
+          "method": "Modchip Picofly + Atmosphère",
+          "guideId": "switch-modchip"
+        }
+      }
+    ],
+    "firmwares": [
+      {
+        "id": "sw1-patched-low",
+        "label": "1.0.0 – 4.1.0",
+        "variant": "patched_v1",
+        "min": "1.0.0",
+        "max": "4.1.0",
+        "status": "green",
+        "title": "Jailbreak por software",
+        "explanation": "Solo V1 parcheadas que nunca pasaron de la 4.1.0: Caffeine/Nereba.",
+        "method": "Caffeine / Nereba",
+        "guideId": ""
+      },
+      {
+        "id": "sw1-patched-high",
+        "label": "5.0.0 o superior",
+        "variant": "patched_v1",
+        "min": "5.0.0",
+        "max": "",
+        "status": "orange",
+        "title": "Solo con modchip",
+        "explanation": "Sin hackeo por software: hace falta un modchip.",
+        "method": "Modchip Picofly",
+        "guideId": "switch-modchip"
+      }
+    ],
+    "sources": [
+      {
+        "title": "NH Switch Guide",
+        "url": "https://switch.hacks.guide/"
+      },
+      {
+        "title": "Atmosphère (descargas)",
+        "url": "https://github.com/Atmosphere-NX/Atmosphere/releases"
+      }
+    ]
+  },
+  "guides": [
+    {
+      "id": "switch-rcm",
+      "title": "Switch V1 sin parche: Atmosphère con RCM",
+      "consoleIds": [
+        "switch1"
+      ],
+      "difficulty": "media",
+      "time": "1–2 horas",
+      "summary": "Con un jig entras en el modo RCM, envías el payload hekate desde el PC o el teléfono con OmniRCM, haces copia de la NAND y arrancas Atmosphère. Lo recomendable es usar una emuMMC (una copia del sistema en la microSD) y dejar el sistema original para jugar online.",
+      "requirements": [
+        "Switch V1 sin parche: compruébalo con el número de serie (Configuración > Sistema > Información de serie) en la guía o en ismyswitchpatched.com",
+        "Jig RCM para el riel derecho (no uses clips ni papel de aluminio: puede dañar la consola)",
+        "Cable USB-C con datos",
+        "PC (Windows, macOS o Linux), teléfono Android o navegador Chrome/Edge",
+        "microSD de 128 GB o más si vas a crear la emuMMC (recomendado)",
+        "Atmosphère 1.12.1 o posterior y hekate 6.5.4 o posterior (soportan hasta el firmware 23.0.1)"
+      ],
+      "steps": [
+        {
+          "title": "Antes de empezar",
+          "text": "Si vas a usar emuMMC: desactiva la copia automática de partidas en la nube y marca esta Switch como consola principal de tu cuenta. Instala al menos un juego o demo de la eShop (sirve para abrir el Homebrew Menu con todas sus funciones).",
+          "image": "",
+          "imageCaption": ""
+        },
+        {
+          "title": "Entra en modo RCM",
+          "text": "Apaga la consola del todo. Mete el jig en el riel derecho, mantén pulsado Volumen + y pulsa Power una vez. Si la pantalla se queda negra (no aparece el logo de Nintendo) estás en RCM. Quita el jig.",
+          "image": "",
+          "imageCaption": ""
+        },
+        {
+          "title": "Envía el payload hekate",
+          "text": "Descarga hekate (hekate_ctcaer_X.X.X_Nyx_X.X.X.zip) y usa el archivo hekate_ctcaer_X.X.X.bin. Conecta la Switch por USB y abre OmniRCM: en Windows pulsa Install Driver, luego Update, elige hekate e Inject Payload. En Android usa la app OmniRCM (Fetch Payloads > hekate > Inject). Sin instalar nada: omnircm.nintendohomebrew.com/web en Chrome, Connect device > APX > hekate > Inject.",
+          "image": "",
+          "imageCaption": ""
+        },
+        {
+          "title": "Particiona la microSD y crea la emuMMC",
+          "text": "En hekate: Tools > Partition SD card. Deja espacio para la emuMMC (unos 29 GB en tarjetas de 128 GB) y aplica. Después: emuMMC > Create emuMMC > SD Partition. Este paso borra la microSD: guarda antes lo que tengas.",
+          "image": "",
+          "imageCaption": ""
+        },
+        {
+          "title": "Prepara la microSD",
+          "text": "Con hekate en Tools > USB tools > SD card la Switch aparece en el PC. Copia el contenido del zip de Atmosphère (atmosphere-X-master-...+hbl+hbmenu.zip) a la raíz, luego la carpeta bootloader de hekate y de bootlogos.zip, y el archivo hekate_ipl.ini dentro de bootloader. Crea la carpeta atmosphere/hosts y pon dentro el archivo emummc.txt de la guía (bloquea los servidores de Nintendo: evita baneos).",
+          "image": "",
+          "imageCaption": ""
+        },
+        {
+          "title": "Haz las copias de seguridad",
+          "text": "En hekate: Tools > Backup eMMC > eMMC BOOT0 & BOOT1, y después eMMC RAW GPP (puede tardar más de una hora). Luego Tools > USB tools > SD card y copia la carpeta backup a tu PC. Guárdala comprimida en un lugar seguro: es tu salvavidas.",
+          "image": "",
+          "imageCaption": ""
+        },
+        {
+          "title": "Arranca Atmosphère",
+          "text": "En hekate: Launch > Atmosphere PKG3 emuMMC. En Configuración > Sistema la versión debe terminar en 'AMS … E'. Para el Homebrew Menu, mantén R mientras abres cualquier juego (o abre el Álbum, con menos memoria).",
+          "image": "",
+          "imageCaption": ""
+        },
+        {
+          "title": "Cada vez que la apagues",
+          "text": "Al apagarla del todo hay que repetir el jig y el payload. En reposo el hack se mantiene. Antes de actualizar el firmware, actualiza Atmosphère y hekate a una versión que lo soporte.",
+          "image": "",
+          "imageCaption": ""
+        }
+      ],
+      "warnings": [
+        "Nunca conectes la emuMMC a los servidores de Nintendo: usa el sistema original (sysMMC) para jugar online. Mezclar ambos online acaba en baneo.",
+        "El jig nunca debe tocar el pin 4 del riel (lleva 5 V).",
+        "Si la pantalla sigue negra tras enviar el payload, el archivo está dañado o tu consola está parcheada."
+      ],
+      "links": [
+        {
+          "title": "NH Switch Guide (guía completa)",
+          "url": "https://switch.hacks.guide/"
+        },
+        {
+          "title": "Enviar el payload (OmniRCM)",
+          "url": "https://switch.hacks.guide/user_guide/rcm/sending_payload"
+        },
+        {
+          "title": "Atmosphère (descargas)",
+          "url": "https://github.com/Atmosphere-NX/Atmosphere/releases"
+        },
+        {
+          "title": "hekate (descargas)",
+          "url": "https://github.com/CTCaer/hekate/releases"
+        },
+        {
+          "title": "¿Mi Switch está parcheada?",
+          "url": "https://ismyswitchpatched.com/"
+        }
+      ]
+    }
+  ]
+}

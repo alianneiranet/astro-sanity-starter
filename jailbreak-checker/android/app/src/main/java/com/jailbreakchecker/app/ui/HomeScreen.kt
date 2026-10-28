@@ -82,6 +82,8 @@ fun HomeScreen(
     guides: List<Guide>,
     updatingGuides: Set<String>,
     onUpdateAllGuides: () -> Unit,
+    prompt: () -> String = { "" },
+    onImportText: (String) -> Unit = {},
     hasApiKey: Boolean,
     searching: Boolean,
     onBrand: (String) -> Unit,
@@ -143,7 +145,7 @@ fun HomeScreen(
             when (tab) {
                 0 -> BrandsTab(brands, consoles, hasApiKey, onBrand, onConsole, onSettings)
                 1 -> NewsList(news, consoles, searching, onConsole, onSearchNow)
-                else -> GuidesList(guides, consoles, hasApiKey, updatingGuides, onGuide, onUpdateAllGuides, onSettings)
+                else -> GuidesList(guides, consoles, hasApiKey, updatingGuides, onGuide, onUpdateAllGuides, onSettings, prompt, onImportText)
             }
         }
     }
@@ -395,6 +397,8 @@ private fun GuidesList(
     onGuide: (String) -> Unit,
     onUpdateAll: () -> Unit,
     onSettings: () -> Unit,
+    prompt: () -> String,
+    onImportText: (String) -> Unit,
 ) {
     val names = consoles.associate { it.id to it.shortName }
     LazyColumn(
@@ -447,6 +451,14 @@ private fun GuidesList(
                     }
                 }
             }
+        }
+        item {
+            ImportCard(
+                title = "Importar guía de otra IA (gratis)",
+                description = "Copia el prompt, escribe la consola al principio y pégalo en ChatGPT, Gemini o Claude con búsqueda web. Después pega aquí su respuesta (JSON) o ábrela como archivo. Para una consola concreta es mejor usar el botón que hay dentro de cada consola: ya incluye sus datos.",
+                prompt = prompt,
+                onImportText = onImportText,
+            )
         }
         items(guides, key = { it.id }) { guide ->
             Card(

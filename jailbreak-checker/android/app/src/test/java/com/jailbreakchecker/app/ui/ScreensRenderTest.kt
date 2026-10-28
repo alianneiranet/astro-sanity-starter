@@ -66,7 +66,11 @@ class ScreensRenderTest {
 
     @Test
     fun home() {
-        show { HomeScreen(catalog.brands, catalog.consoles, emptyList(), UpdaterMeta(), guides.values.toList(), emptySet(), {}, false, false, {}, {}, {}, {}, {}) }
+        show { HomeScreen(
+                brands = catalog.brands, consoles = catalog.consoles, news = emptyList(), meta = UpdaterMeta(),
+                guides = guides.values.toList(), updatingGuides = emptySet(), onUpdateAllGuides = {},
+                hasApiKey = false, searching = false, onBrand = {}, onConsole = {}, onGuide = {}, onSearchNow = {}, onSettings = {},
+            ) }
         compose.onNodeWithText("Activa la búsqueda con IA").assertExists()
         snapshot("home")
     }
@@ -132,6 +136,28 @@ class ScreensRenderTest {
         compose.onNodeWithText("Atmosphère 1.12.2").assertDoesNotExist()
         compose.onNodeWithText("Todo").performClick()
         snapshot("news")
+    }
+
+    @Test
+    fun guideWithImportedImage() {
+        val dir = File("build/tmp-images").apply { mkdirs() }
+        val bmp = Bitmap.createBitmap(320, 160, Bitmap.Config.ARGB_8888).apply { eraseColor(android.graphics.Color.rgb(40, 120, 220)) }
+        val file = File(dir, "paso.png").apply { outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) } }
+        val base = guides.getValue("switch-rcm")
+        val guide = base.copy(
+            origin = "importada",
+            updatedAt = "2026-10-29T10:00:00Z",
+            steps = listOf(base.steps[0].copy(image = file.toURI().toString(), imageCaption = "Menú de hekate")) + base.steps.drop(1),
+        )
+        show { GuideScreen(guide, "2026-10-28", false, false, {}, {}, {}) }
+        compose.onNodeWithText("Menú de hekate").assertExists()
+        snapshot("guide-with-image")
+    }
+
+    @Test
+    fun consoleImportCard() {
+        show { ConsoleScreen(console("ps1"), brand("sony"), guides, false, false, {}, {}, {}, { "prompt" }, {}) }
+        compose.onNodeWithText("Actualizar con otra IA (gratis)").assertExists()
     }
 
     @Test

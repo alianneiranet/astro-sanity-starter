@@ -153,6 +153,9 @@ data class ChangeRecord(
 data class GuideStep(
     val title: String,
     val text: String,
+    /** Optional picture: https URL or a local file:// path (imported base64 images are saved as files). */
+    val image: String = "",
+    val imageCaption: String = "",
 )
 
 @Serializable
@@ -170,6 +173,8 @@ data class Guide(
     val links: List<Source> = emptyList(),
     /** Set when the AI rewrote the guide (ISO-8601); empty for the bundled version. */
     val updatedAt: String = "",
+    /** "" = shipped with the app, "ia" = rewritten by the in-app AI, "importada" = imported JSON. */
+    val origin: String = "",
 )
 
 @Serializable
