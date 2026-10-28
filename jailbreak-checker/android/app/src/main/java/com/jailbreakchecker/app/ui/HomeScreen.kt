@@ -13,19 +13,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SportsEsports
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -55,6 +63,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.jailbreakchecker.app.data.Brand
 import com.jailbreakchecker.app.data.ConsoleInfo
+import com.jailbreakchecker.app.data.Guide
 import com.jailbreakchecker.app.data.NewsItem
 import com.jailbreakchecker.app.data.Status
 import com.jailbreakchecker.app.data.UpdaterMeta
@@ -65,11 +74,16 @@ import java.text.Normalizer
 fun HomeScreen(
     brands: List<Brand>,
     consoles: List<ConsoleInfo>,
-    news: List<NewsItem>?,
-    meta: UpdaterMeta?,
-    onlineEnabled: Boolean,
+    news: List<NewsItem>,
+    meta: UpdaterMeta,
+    guides: List<Guide>,
+    hasApiKey: Boolean,
+    searching: Boolean,
     onBrand: (String) -> Unit,
     onConsole: (String) -> Unit,
+    onGuide: (String) -> Unit,
+    onSearchNow: () -> Unit,
+    onSettings: () -> Unit,
 ) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     Scaffold(
@@ -79,11 +93,21 @@ fun HomeScreen(
                     Column {
                         Text("Revisor de Jailbreak", style = MaterialTheme.typography.titleLarge)
                         Text(
-                            updateLine(meta, onlineEnabled),
+                            updateLine(meta, hasApiKey, searching),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
+                },
+                actions = {
+                    if (searching) {
+                        CircularProgressIndicator(Modifier.padding(12.dp).size(22.dp), strokeWidth = 2.dp)
+                    } else {
+                        IconButton(onClick = if (hasApiKey) onSearchNow else onSettings) {
+                            Icon(Icons.Outlined.Refresh, "Buscar novedades ahora")
+                        }
+                    }
+                    IconButton(onClick = onSettings) { Icon(Icons.Outlined.Settings, "Ajustes") }
                 },
             )
         },
@@ -101,32 +125,40 @@ fun HomeScreen(
                     icon = { Icon(Icons.Outlined.Newspaper, null) },
                     label = { Text("Noticias") },
                 )
+                NavigationBarItem(
+                    selected = tab == 2,
+                    onClick = { tab = 2 },
+                    icon = { Icon(Icons.AutoMirrored.Outlined.MenuBook, null) },
+                    label = { Text("Guías") },
+                )
             }
         },
     ) { padding ->
         Box(Modifier.padding(padding)) {
-            if (tab == 0) {
-                BrandsTab(brands, consoles, onlineEnabled, onBrand, onConsole)
-            } else {
-                NewsList(news, consoles, onlineEnabled, onConsole)
+            when (tab) {
+                0 -> BrandsTab(brands, consoles, hasApiKey, onBrand, onConsole, onSettings)
+                1 -> NewsList(news, consoles, hasApiKey, onConsole, onSettings)
+                else -> GuidesList(guides, consoles, onGuide)
             }
         }
     }
 }
 
-private fun updateLine(meta: UpdaterMeta?, onlineEnabled: Boolean): String {
-    if (!onlineEnabled) return "Datos incluidos en la app (sin conexión)"
-    val last = meta?.lastSuccessAt?.takeIf { it.isNotBlank() } ?: return "Revisado por IA cada hora"
-    return "IA revisó las noticias ${relativeTime(last)}"
+private fun updateLine(meta: UpdaterMeta, hasApiKey: Boolean, searching: Boolean): String {
+    if (searching) return "La IA está buscando novedades…"
+    if (!hasApiKey) return "Datos de octubre de 2026 · IA sin configurar"
+    val last = meta.lastSuccessAt.takeIf { it.isNotBlank() } ?: return "La IA aún no ha buscado novedades"
+    return "La IA revisó las noticias ${relativeTime(last)}"
 }
 
 @Composable
 private fun BrandsTab(
     brands: List<Brand>,
     consoles: List<ConsoleInfo>,
-    onlineEnabled: Boolean,
+    hasApiKey: Boolean,
     onBrand: (String) -> Unit,
     onConsole: (String) -> Unit,
+    onSettings: () -> Unit,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     val results = remember(query, consoles) { searchConsoles(consoles, query) }
@@ -139,8 +171,8 @@ private fun BrandsTab(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
-        if (!onlineEnabled) {
-            item(span = { GridItemSpan(maxLineSpan) }) { OfflineBanner() }
+        if (!hasApiKey) {
+            item(span = { GridItemSpan(maxLineSpan) }) { SetupBanner(onSettings) }
         }
         item(span = { GridItemSpan(maxLineSpan) }) {
             OutlinedTextField(
@@ -228,7 +260,7 @@ private fun BrandCard(brand: Brand, consoles: List<ConsoleInfo>, onClick: () -> 
                 .padding(16.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ConsoleIcon(newest?.formFactor ?: "home", lerp(color, Color.White, 0.15f), size = 52.dp)
+                ConsoleLogo(brand.id, newest?.formFactor ?: "home", lerp(color, Color.White, 0.15f), size = 52.dp, width = 96.dp)
                 Spacer(Modifier.weight(1f))
                 Text(
                     "${consoles.size}",
@@ -275,7 +307,7 @@ fun ConsoleRow(console: ConsoleInfo, brand: Brand?, onClick: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            ConsoleIcon(console.formFactor, parseHexColor(brand?.color ?: "#455A64"), size = 56.dp)
+            ConsoleLogo(console.id, console.formFactor, parseHexColor(brand?.color ?: "#455A64"), size = 56.dp, width = 84.dp)
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
                 Text(console.name, style = MaterialTheme.typography.titleMedium, maxLines = 2)
@@ -302,21 +334,26 @@ fun ConsoleRow(console: ConsoleInfo, brand: Brand?, onClick: () -> Unit) {
 }
 
 @Composable
-private fun OfflineBanner() {
+fun SetupBanner(onSettings: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .clickable(onClick = onSettings)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(Icons.Outlined.CloudOff, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(Icons.Outlined.AutoAwesome, null, tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.width(12.dp))
-        Text(
-            "Mostrando los datos incluidos en la app. Conecta Firebase para recibir las actualizaciones de la IA cada hora.",
-            style = MaterialTheme.typography.bodySmall,
-        )
+        Column(Modifier.weight(1f)) {
+            Text("Activa la búsqueda con IA", style = MaterialTheme.typography.labelLarge)
+            Text(
+                "Pon tu API key de Anthropic y la app buscará las novedades ella misma cada hora.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null)
     }
 }
 
@@ -337,5 +374,40 @@ fun Disclaimer(modifier: Modifier = Modifier) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Normal,
         )
+    }
+}
+
+@Composable
+private fun GuidesList(guides: List<Guide>, consoles: List<ConsoleInfo>, onGuide: (String) -> Unit) {
+    val names = consoles.associate { it.id to it.shortName }
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        item {
+            Text(
+                "Guías paso a paso de cada método. También las encuentras dentro de cada consola, junto al firmware que te corresponde.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        items(guides, key = { it.id }) { guide ->
+            Card(
+                onClick = { onGuide(guide.id) },
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+            ) {
+                Column(Modifier.padding(14.dp)) {
+                    Text(guide.title, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        guide.consoleIds.mapNotNull { names[it] }.joinToString(" · ") +
+                            if (guide.time.isNotBlank()) " · ${guide.time}" else "",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
     }
 }

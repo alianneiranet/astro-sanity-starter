@@ -7,6 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -15,7 +17,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.jailbreakchecker.app.ui.BrandScreen
 import com.jailbreakchecker.app.ui.ConsoleScreen
+import com.jailbreakchecker.app.ui.GuideScreen
 import com.jailbreakchecker.app.ui.HomeScreen
+import com.jailbreakchecker.app.ui.LocalLogoIds
+import com.jailbreakchecker.app.ui.SettingsScreen
 import com.jailbreakchecker.app.ui.theme.JailbreakTheme
 
 class MainActivity : ComponentActivity() {
@@ -29,20 +34,25 @@ class MainActivity : ComponentActivity() {
         setContent {
             JailbreakTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    AppNavigation(viewModel)
+                    CompositionLocalProvider(LocalLogoIds provides viewModel.logoIds) {
+                        AppNavigation(viewModel)
+                    }
                 }
             }
         }
     }
 }
 
-@androidx.compose.runtime.Composable
+@Composable
 private fun AppNavigation(viewModel: MainViewModel) {
     val nav = rememberNavController()
-    val brands by viewModel.brands.collectAsStateWithLifecycle()
     val consoles by viewModel.consoles.collectAsStateWithLifecycle()
     val news by viewModel.news.collectAsStateWithLifecycle()
     val meta by viewModel.meta.collectAsStateWithLifecycle()
+    val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val running by viewModel.running.collectAsStateWithLifecycle()
+    val brands = viewModel.brands
+    val guides = viewModel.guides.associateBy { it.id }
 
     NavHost(navController = nav, startDestination = "home") {
         composable("home") {
@@ -51,9 +61,14 @@ private fun AppNavigation(viewModel: MainViewModel) {
                 consoles = consoles,
                 news = news,
                 meta = meta,
-                onlineEnabled = viewModel.onlineEnabled,
+                guides = viewModel.guides,
+                hasApiKey = settings.hasApiKey,
+                searching = "scan" in running,
                 onBrand = { nav.navigate("brand/$it") },
                 onConsole = { nav.navigate("console/$it") },
+                onGuide = { nav.navigate("guide/$it") },
+                onSearchNow = viewModel::runNow,
+                onSettings = { nav.navigate("settings") },
             )
         }
         composable("brand/{brandId}") { entry ->
@@ -66,11 +81,31 @@ private fun AppNavigation(viewModel: MainViewModel) {
             )
         }
         composable("console/{consoleId}") { entry ->
-            val consoleId = entry.arguments?.getString("consoleId")
+            val consoleId = entry.arguments?.getString("consoleId").orEmpty()
             val console = consoles.firstOrNull { it.id == consoleId }
             ConsoleScreen(
                 console = console,
                 brand = brands.firstOrNull { it.id == console?.brandId },
+                guides = guides,
+                hasApiKey = settings.hasApiKey,
+                reviewing = consoleId in running,
+                onBack = { nav.popBackStack() },
+                onGuide = { nav.navigate("guide/$it") },
+                onReview = { viewModel.reviewNow(consoleId) },
+            )
+        }
+        composable("guide/{guideId}") { entry ->
+            GuideScreen(guides[entry.arguments?.getString("guideId")], onBack = { nav.popBackStack() })
+        }
+        composable("settings") {
+            SettingsScreen(
+                settings = settings,
+                meta = meta,
+                running = running.isNotEmpty(),
+                onSave = viewModel::saveSettings,
+                onVerify = viewModel::verifyKey,
+                onRunNow = viewModel::runNow,
+                onClearAi = { viewModel.clearAiData() },
                 onBack = { nav.popBackStack() },
             )
         }

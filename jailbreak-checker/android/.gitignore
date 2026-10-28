@@ -5,7 +5,5 @@ local.properties
 *.iml
 .kotlin/
 captures/
-# Firebase config is per-project; keep it out of git (CI writes it from a secret)
-app/google-services.json
 *.jks
 *.keystore

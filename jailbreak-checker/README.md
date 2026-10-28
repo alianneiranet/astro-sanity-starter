@@ -1,132 +1,91 @@
-# Revisor de Jailbreak (app Android + Firebase + IA)
+# Revisor de Jailbreak (app Android con IA)
 
-App Android sencilla que te dice si tu consola se puede hackear, según la marca, el modelo y el firmware. Un servidor en Firebase usa IA (Claude, con búsqueda web) para revisar las noticias de la escena **cada hora** y actualizar los datos solo.
+App Android sencilla que te dice si tu consola se puede hackear según la marca, el modelo y el firmware, y te enseña cómo hacerlo con una guía paso a paso. La IA busca las novedades **desde el propio teléfono**, sin servidor: usa Claude (Anthropic) con búsqueda web y tu propia API key.
 
-| Inicio | Nintendo | PS5 + búsqueda de versión | Switch: primero el modelo | PS1: sin preguntar firmware |
+| Inicio | Nintendo | PS5 + tu versión | Switch V2: solo modchip | Guía paso a paso |
 |---|---|---|---|---|
-| ![](docs/home.png) | ![](docs/brand-nintendo.png) | ![](docs/console-ps5.png) | ![](docs/console-switch1.png) | ![](docs/console-ps1.png) |
+| ![](docs/home.png) | ![](docs/brand-nintendo.png) | ![](docs/console-ps5.png) | ![](docs/console-switch1-v2.png) | ![](docs/guide-switch-rcm.png) |
 
-## Cómo funciona la app
+## Cómo funciona
 
-1. **Elige la compañía**: PlayStation, Nintendo, Xbox, SEGA o Atari (con las consolas antiguas también).
-2. **Elige la consola**, por ejemplo Nintendo → Switch 2. Están separadas en "Actuales" y "Clásicas / antiguas".
+1. **Elige la compañía**: PlayStation, Nintendo, Xbox, SEGA o Atari, también con las consolas antiguas.
+2. **Elige la consola**, por ejemplo Nintendo → Switch 2. Cada consola muestra su logo oficial.
 3. **La app pregunta solo lo necesario**:
-   - Si todas las versiones dan igual (PS1, PS2, NES, Wii…), **no pregunta el firmware**: te dice directamente "Todas las versiones".
-   - Si el modelo importa (Switch V1 sin parche frente a V2/Lite/OLED, o PS3 compatible o no con CFW), primero pregunta **qué modelo tienes**.
-   - Después muestra la **lista de firmwares** con el color justo al lado. También puedes **escribir tu versión** (por ejemplo `9.60`) y la app busca el rango que le corresponde.
-4. Al tocar un rango se ve la explicación, el método (GoldHEN, Atmosphère…) y las fuentes.
-5. En la pestaña **Noticias** aparecen las novedades que encuentra la IA.
-
-### Colores
+   - **PS1, PS2, NES, Wii…**: todas sus versiones se pueden hackear, así que **no pregunta el firmware**.
+   - **Si el modelo importa, pregunta primero el modelo.** Por ejemplo, la **Switch V2, Lite u OLED** muestra directamente **"Solo con modchip, hay que abrirla"**, porque ningún firmware tiene hackeo por software. Solo la V1 parcheada pregunta el firmware.
+   - En el resto, muestra la **lista de firmwares** con el color de cada uno al lado. También puedes **escribir tu versión** (por ejemplo `9.60`) para ver directamente el resultado.
+4. Junto a cada resultado hay un botón **"Ver guía: cómo hacerlo"** con requisitos, pasos numerados, avisos y enlaces oficiales. Todas las guías están también en la pestaña **Guías**.
+5. La pestaña **Noticias** muestra lo que encuentra la IA.
 
 | Color | Significado |
 |---|---|
 | 🟢 Verde | Hay jailbreak o homebrew público y funcional. |
-| 🟠 Naranja | Se puede, con condiciones: abrir la consola, soldar un chip o solo ciertos modelos. |
-| 🟡 Amarillo | En desarrollo o incompleto (exploit parcial, no publicado o pendiente de actualizar). Siempre lleva una explicación del porqué. |
+| 🟠 Naranja | Se puede, con condiciones: abrir la consola y soldar un chip, o solo en ciertos modelos. |
+| 🟡 Amarillo | En desarrollo o incompleto (exploit parcial, no publicado o pendiente de actualizar). Siempre lleva una explicación. |
 | 🔴 Rojo | No existe ningún método conocido. |
 
-## Estructura
+## La IA en el teléfono
 
-```
-jailbreak-checker/
-├── data/consoles.json        ← catálogo inicial (marcas, consolas, rangos y colores)
-├── android/                  ← app Android (Kotlin + Jetpack Compose)
-├── firebase/
-│   ├── firestore.rules       ← la app solo lee; solo el servidor escribe
-│   └── functions/            ← función programada cada hora con Claude + búsqueda web
-└── docs/                     ← capturas
-```
+En **Ajustes** (icono del engranaje):
 
-La app lleva una copia de `data/consoles.json`, así que **funciona aunque no haya internet ni Firebase**. Cuando Firebase está configurado, lo que escribe la IA en Firestore sustituye a esos datos en tiempo real.
+1. Pega tu **API key de Anthropic** (se crea en <https://console.anthropic.com/settings/keys>). Al guardarla, la app comprueba que funciona. Se guarda **cifrada con el Android Keystore** y solo se envía a `api.anthropic.com`.
+2. Elige el **modelo**: Claude Opus 5.5 (por defecto, la más precisa), Sonnet 5.5 o Haiku 5.5 (más baratas).
+3. Elige la **revisión automática**: cada hora (por defecto), cada 3, 6, 12 o 24 horas, o apagada.
 
----
+Qué hace cada revisión (en segundo plano con WorkManager, solo cuando hay internet):
 
-## 1. Conseguir el APK
+1. **Escaneo de noticias**: Claude hace unas 5 búsquedas web en fuentes de la escena (GBAtemp, Wololo, PSX-Place, los GitHub de los proyectos, ConsoleMods, hacks.guide…). Guarda las noticias nuevas y decide qué consolas han quedado desactualizadas.
+2. **Revisión de consolas**: hasta 2 por ronda. Son las que tienen noticias y las que llevan tiempo sin revisarse (las actuales cada 24 h, las retro cada 30 días). Claude devuelve el estado completo de cada modelo y rango de firmware. También puedes forzarla con **"Revisar esta consola con IA ahora"**.
+3. **Validación**: antes de guardar, la app comprueba que las versiones estén en orden, que cada modelo quede cubierto y que los colores y las guías sean válidos. Si algo no cuadra, se conservan los datos anteriores.
+4. **Avisos**: si una consola cambia o hay noticias nuevas, recibes una notificación.
 
-**Opción A: GitHub Actions (sin instalar nada).** Cada push que toca `jailbreak-checker/` ejecuta el workflow *Jailbreak Checker*. En la pestaña **Actions** de GitHub, abre la última ejecución y descarga el artefacto `revisor-jailbreak-apk`. Dentro está `app-release.apk`: pásalo al teléfono e instálalo (hay que permitir "instalar apps desconocidas").
+Las llamadas usan razonamiento adaptativo y herramientas con esquema estricto. También activan el *fallback* del servidor, que reintenta con otro modelo si el primero rechaza una búsqueda sobre jailbreaks.
 
-**Opción B: compilar en tu PC.** Necesitas el JDK 17 o posterior y el Android SDK (Android Studio los instala):
+**Coste** (en tu cuenta de Anthropic): una búsqueda cuesta unos 0,23 US$ con Opus 5.5, 0,14 US$ con Sonnet 5.5 y 0,06 US$ con Haiku 5.5. Cada hora con Opus sale por unos 8 US$ al día. La pantalla de Ajustes muestra la estimación para tu configuración y el consumo real de la última búsqueda. Para gastar menos, elige otro modelo o revisa cada más horas.
+
+Sin API key la app funciona igual con los datos que lleva incluidos (octubre de 2026).
+
+## Conseguir el APK
+
+- **GitHub Actions**: cada push que toca `jailbreak-checker/` compila la app. En **Actions → Jailbreak Checker**, descarga el artefacto `revisor-jailbreak-apk` e instala `app-release.apk` (hay que permitir "instalar apps desconocidas").
+- **En tu PC** (JDK 17+ y Android SDK):
 
 ```bash
 cd jailbreak-checker/android
 ./gradlew assembleRelease   # → app/build/outputs/apk/release/app-release.apk
 ```
 
-> Sin `google-services.json` el APK funciona en **modo sin conexión**, solo con los datos incluidos. Para las actualizaciones automáticas, sigue el paso 2.
+Para que las actualizaciones se instalen encima sin desinstalar, firma siempre con la misma clave. Para ello crea los secretos `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` y `ANDROID_KEY_PASSWORD` en GitHub.
 
-## 2. Conectar con tu Firebase
+## Estructura
 
-Necesitas el **plan Blaze**, que es obligatorio para Cloud Functions y Secret Manager.
-
-1. En la [consola de Firebase](https://console.firebase.google.com), abre tu proyecto y entra en **Añadir app → Android**, con el paquete `com.jailbreakchecker.app`.
-2. Descarga `google-services.json` y haz una de estas dos cosas:
-   - Cópialo a `jailbreak-checker/android/app/google-services.json` (está en `.gitignore`, no se sube), o
-   - en GitHub ve a **Settings → Secrets and variables → Actions** y crea el secreto `GOOGLE_SERVICES_JSON` con el contenido del archivo. El workflow lo usará al compilar.
-3. En **Firestore Database**, crea la base de datos (modo producción; las reglas se despliegan en el paso 3).
-
-## 3. Activar la IA que revisa cada hora
-
-1. Crea una API key de Anthropic en <https://console.anthropic.com> (tiene un coste por uso; abajo hay una estimación).
-2. Instala Firebase CLI y despliega:
-
-```bash
-npm install -g firebase-tools
-firebase login
-
-cd jailbreak-checker/firebase
-firebase use --add                       # elige tu proyecto (crea .firebaserc)
-firebase functions:secrets:set ANTHROPIC_API_KEY   # pega tu API key
-
-cd functions && npm ci && cd ..
-firebase deploy --only functions,firestore
+```
+jailbreak-checker/
+├── data/
+│   ├── consoles.json   ← marcas, consolas, modelos y rangos de firmware con su color
+│   ├── guides.json     ← guías paso a paso
+│   └── logos/          ← logos SVG (Wikimedia Commons, ver CREDITS.md)
+├── android/            ← app (Kotlin + Jetpack Compose + SDK de Anthropic para Java)
+│   └── app/src/main/java/com/jailbreakchecker/app/
+│       ├── ai/         ← prompts, esquemas, validación, búsqueda en segundo plano
+│       ├── data/       ← modelos, almacenamiento local, ajustes cifrados
+│       └── ui/         ← pantallas
+└── docs/               ← capturas
 ```
 
-En el primer despliegue la CLI te preguntará los parámetros. Con pulsar Enter se usan los valores por defecto (los de la tabla de abajo).
-
-3. **La primera ejecución** carga el catálogo en Firestore y empieza a revisar. Para no esperar a la siguiente hora, ve a Google Cloud Console → **Cloud Scheduler** → `firebase-schedule-hourlyJailbreakCheck-…` → **Forzar ejecución**, o ejecuta:
-
-```bash
-gcloud scheduler jobs run firebase-schedule-hourlyJailbreakCheck-us-central1 --location us-central1
-```
-
-Los registros se ven con `firebase functions:log`.
-
-### Qué hace el servidor cada hora
-
-1. **Escanea noticias**: Claude busca en la web (GBAtemp, Wololo, PSX-Place, GitHub de los proyectos, ConsoleMods, hacks.guide, prensa de videojuegos…) y las compara con lo que muestra la app. Las novedades se guardan en `news`, que es lo que aparece en la pestaña Noticias.
-2. **Revisa consolas**: si una noticia cambia algo, o si una consola lleva tiempo sin revisarse (las actuales cada 24 h, las retro cada 30 días), Claude investiga esa consola y devuelve sus rangos de firmware completos.
-3. **Valida antes de guardar**: versiones en orden, modelos existentes, colores válidos. Si algo no cuadra, se conservan los datos anteriores. Cada cambio se registra en `consoles/{id}/history`.
-4. Escribe la hora de la última revisión en `meta/status`; la app la muestra arriba ("IA revisó las noticias hace X min").
-
-### Parámetros y coste
-
-| Parámetro | Por defecto | Qué controla |
-|---|---|---|
-| `CLAUDE_MODEL` | `claude-opus-5-5` | Modelo de IA |
-| `SCAN_EFFORT` / `REVIEW_EFFORT` | `medium` / `high` | Cuánto "piensa" la IA en el escaneo y en las revisiones |
-| `SCAN_MAX_SEARCHES` / `REVIEW_MAX_SEARCHES` | `5` / `5` | Búsquedas web por llamada |
-| `MAX_REVIEWS_PER_RUN` | `2` | Revisiones detalladas como máximo por hora |
-
-Se cambian en `firebase/functions/.env.<tu-proyecto>` y se aplican con `firebase deploy --only functions`.
-
-**Estimación aproximada** con los valores por defecto: unos 0,20–0,30 US$ por escaneo horario más unas 10 revisiones al día. En total, **unos 8–10 US$ al día (≈ 250–300 US$ al mes)** en la API de Anthropic. Firebase (Functions + Firestore) apenas añade coste con este uso. Las cifras dependen del tamaño real de las búsquedas, así que revisa el consumo en console.anthropic.com los primeros días. Para gastar menos:
-
-- `CLAUDE_MODEL=claude-sonnet-5-5` cuesta aproximadamente la mitad por token.
-- `SCAN_EFFORT=low` y `SCAN_MAX_SEARCHES=3`.
-- Revisar cada 2 o 3 horas: cambia `schedule: "every 60 minutes"` en `functions/src/index.ts`.
-
-## Editar los datos a mano
-
-Edita `data/consoles.json`. Para añadir una consola, copia otra como plantilla: `mode: "all"` si todas las versiones comparten estado, o `mode: "firmware"` con su lista `firmwares`. Para que Firestore reciba tus cambios, **sube `seedVersion`** y vuelve a desplegar. Las consolas que la IA ya actualizó después conservan sus datos más recientes.
+`data/` se empaqueta directamente dentro del APK. Para corregir algo a mano, edita `consoles.json` o `guides.json` y compila. Una versión nueva de la app sustituye los datos que la IA había guardado antes de esa versión.
 
 ## Tests
 
 ```bash
-cd jailbreak-checker/android && ./gradlew testDebugUnitTest   # lógica de versiones, datos y capturas de pantalla
-cd jailbreak-checker/firebase/functions && npm test           # validación de las respuestas de la IA
+cd jailbreak-checker/android && ./gradlew testDebugUnitTest
 ```
+
+Incluyen:
+- La lógica de versiones y la coherencia de los datos y las guías.
+- Una ronda completa de la IA con el SDK real contra una API simulada: cabeceras, *fallback*, búsqueda web, herramientas estrictas, reanudación tras `pause_turn` y lo que se guarda.
+- Capturas de las pantallas.
 
 ## Aviso
 
-Esta app es solo informativa. Modificar una consola puede anular la garantía o provocar baneos online. Usa homebrew y copias de seguridad de juegos que te pertenezcan y respeta las leyes de tu país.
+Solo informativo. Modificar una consola puede anular la garantía o provocar baneos online. Usa homebrew y copias de seguridad de juegos que te pertenezcan y respeta las leyes de tu país. Los logos son marcas registradas de sus dueños y se muestran solo para identificar cada consola.

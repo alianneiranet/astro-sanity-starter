@@ -1,142 +1,77 @@
 package com.jailbreakchecker.app.data
 
 import android.content.Context
-import android.util.Log
-import com.google.firebase.FirebaseApp
-import com.google.firebase.Timestamp
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.jailbreakchecker.app.BuildConfig
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.decodeFromJsonElement
-import java.time.Instant
 
 /**
- * Source of truth for the UI.
- *
- * The bundled catalog (assets/consoles.json) is always available, so the app works
- * offline and without Firebase. When Firebase is configured, Firestore documents written
- * by the hourly AI updater override the bundled entries with the same id.
+ * Source of truth for the UI: the bundled catalog (assets/consoles.json + guides.json),
+ * overlaid with whatever the on-device AI has updated since (see [LocalStore]).
  */
 class Repository(private val context: Context) {
 
-    val bundled: Catalog by lazy {
-        val text = context.assets.open("consoles.json").bufferedReader().use { it.readText() }
-        json.decodeFromString(Catalog.serializer(), text)
+    private val store = LocalStore.get(context)
+
+    val bundled: Catalog by lazy { loadCatalog(context) }
+
+    val guides: List<Guide> by lazy {
+        val text = context.assets.open("guides.json").bufferedReader().use { it.readText() }
+        json.decodeFromString(GuideCatalog.serializer(), text).guides
     }
 
-    private val firestore: FirebaseFirestore? by lazy {
-        if (!BuildConfig.FIREBASE_CONFIGURED) return@lazy null
-        runCatching {
-            if (FirebaseApp.getApps(context).isEmpty()) FirebaseApp.initializeApp(context)
-            if (FirebaseApp.getApps(context).isEmpty()) null else FirebaseFirestore.getInstance()
-        }.onFailure { Log.w(TAG, "Firebase unavailable, using bundled data", it) }.getOrNull()
+    /** Console ids that have an SVG logo in assets/logos. */
+    val logoIds: Set<String> by lazy {
+        context.assets.list("logos").orEmpty().filter { it.endsWith(".svg") }.map { it.removeSuffix(".svg") }.toSet()
     }
 
-    val isOnlineEnabled: Boolean get() = firestore != null
+    fun consoles(): Flow<List<ConsoleInfo>> = store.state.map { mergeConsoles(bundled.consoles, it) }
 
-    fun brands(): Flow<List<Brand>> = collection("brands", Brand.serializer()) { remote ->
-        mergeById(bundled.brands, remote) { it.id }.sortedBy { it.order }
-    }
+    fun news(): Flow<List<NewsItem>> = store.state.map { it.news }
 
-    fun consoles(): Flow<List<ConsoleInfo>> = collection("consoles", ConsoleInfo.serializer()) { remote ->
-        mergeById(bundled.consoles, remote) { it.id }
-    }
+    fun meta(): Flow<UpdaterMeta> = store.state.map { it.meta }
 
-    fun news(limit: Long = 60): Flow<List<NewsItem>> {
-        val db = firestore ?: return flowOf(emptyList())
-        return callbackFlow {
-            val registration = db.collection("news")
-                .orderBy("createdAt", Query.Direction.DESCENDING)
-                .limit(limit)
-                .addSnapshotListener { snapshot, error ->
-                    if (error != null) {
-                        Log.w(TAG, "news listener", error)
-                        return@addSnapshotListener
-                    }
-                    val items = snapshot?.documents.orEmpty().mapNotNull { doc ->
-                        decode(doc, NewsItem.serializer())?.copy(id = doc.id)
-                    }
-                    trySend(items)
-                }
-            awaitClose { registration.remove() }
-        }
-    }
-
-    fun updaterMeta(): Flow<UpdaterMeta?> {
-        val db = firestore ?: return flowOf(null)
-        return callbackFlow {
-            val registration = db.collection("meta").document("status")
-                .addSnapshotListener { snapshot, error ->
-                    if (error != null) return@addSnapshotListener
-                    trySend(snapshot?.let { decode(it, UpdaterMeta.serializer()) })
-                }
-            awaitClose { registration.remove() }
-        }
-    }
-
-    private fun <T> collection(
-        name: String,
-        serializer: kotlinx.serialization.KSerializer<T>,
-        combine: (List<T>) -> List<T>,
-    ): Flow<List<T>> {
-        val db = firestore ?: return flowOf(combine(emptyList()))
-        return callbackFlow {
-            trySend(combine(emptyList()))
-            val registration = db.collection(name).addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Log.w(TAG, "$name listener", error)
-                    return@addSnapshotListener
-                }
-                val remote = snapshot?.documents.orEmpty().mapNotNull { decode(it, serializer) }
-                trySend(combine(remote))
-            }
-            awaitClose { registration.remove() }
-        }
-    }
-
-    private fun <T> decode(doc: DocumentSnapshot, serializer: kotlinx.serialization.KSerializer<T>): T? =
-        runCatching { json.decodeFromJsonElement(serializer, toJson(doc.data ?: return null)) }
-            .onFailure { Log.w(TAG, "Bad document ${doc.reference.path}", it) }
-            .getOrNull()
+    fun history(): Flow<List<ChangeRecord>> = store.state.map { it.history }
 
     companion object {
-        private const val TAG = "Repository"
-
         val json = Json {
             ignoreUnknownKeys = true
             coerceInputValues = true
             explicitNulls = false
+            encodeDefaults = true
         }
 
-        fun <T> mergeById(base: List<T>, overrides: List<T>, id: (T) -> String): List<T> {
-            val remote = overrides.associateBy(id)
-            val merged = base.map { remote[id(it)] ?: it }
-            val extra = overrides.filter { o -> base.none { id(it) == id(o) } }
-            return merged + extra
+        fun loadCatalog(context: Context): Catalog {
+            val text = context.assets.open("consoles.json").bufferedReader().use { it.readText() }
+            return json.decodeFromString(Catalog.serializer(), text)
         }
 
-        /** Converts Firestore values (maps, lists, Timestamps...) into a JsonElement tree. */
-        fun toJson(value: Any?): JsonElement = when (value) {
+        /** Converts plain Java/Kotlin values (maps, lists, strings, numbers...) into a JSON tree. */
+        fun toJsonElement(value: Any?): JsonElement = when (value) {
             null -> JsonNull
             is JsonElement -> value
             is String -> JsonPrimitive(value)
             is Boolean -> JsonPrimitive(value)
             is Number -> JsonPrimitive(value)
-            is Timestamp -> JsonPrimitive(Instant.ofEpochSecond(value.seconds, value.nanoseconds.toLong()).toString())
-            is Map<*, *> -> JsonObject(value.entries.associate { (k, v) -> k.toString() to toJson(v) })
-            is List<*> -> JsonArray(value.map { toJson(it) })
+            is Map<*, *> -> JsonObject(value.entries.associate { (k, v) -> k.toString() to toJsonElement(v) })
+            is Iterable<*> -> JsonArray(value.map { toJsonElement(it) })
             else -> JsonPrimitive(value.toString())
         }
+
+        /**
+         * An AI-updated console wins only while it is newer than the bundled one, so a new
+         * app version with corrected data replaces older AI results.
+         */
+        fun mergeConsoles(bundled: List<ConsoleInfo>, state: LocalState): List<ConsoleInfo> =
+            bundled.map { base ->
+                val ai = state.consoles[base.id]
+                val chosen = if (ai != null && ai.updatedAt > base.updatedAt) ai else base
+                chosen.copy(lastCheckedAt = state.lastChecked[base.id] ?: chosen.lastCheckedAt)
+            }
     }
 }

@@ -5,26 +5,16 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
-// Firebase is optional at build time: without app/google-services.json the app
-// still builds and runs using the bundled data (data/consoles.json).
-val hasGoogleServices = file("google-services.json").exists()
-if (hasGoogleServices) {
-    apply(plugin = "com.google.gms.google-services")
-} else {
-    logger.warn("google-services.json not found: building without Firebase (offline data only)")
-}
-
 android {
     namespace = "com.jailbreakchecker.app"
     compileSdk = 36
 
     defaultConfig {
         applicationId = "com.jailbreakchecker.app"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
-        buildConfigField("boolean", "FIREBASE_CONFIGURED", hasGoogleServices.toString())
+        versionCode = 2
+        versionName = "2.0.0"
     }
 
     signingConfigs {
@@ -43,15 +33,14 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // The Anthropic SDK relies on Jackson + Kotlin reflection; shrinking it is not worth the risk.
+            isMinifyEnabled = false
             signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 
     sourceSets {
-        // Single source of truth for the offline catalog, shared with the Firebase backend.
+        // Single source of truth for the catalog, guides and logos.
         getByName("main").assets.srcDir("../../data")
     }
 
@@ -70,7 +59,14 @@ android {
     }
 
     packaging {
-        resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        resources.excludes += setOf(
+            "/META-INF/{AL2.0,LGPL2.1}",
+            "/META-INF/DEPENDENCIES",
+            "/META-INF/LICENSE*",
+            "/META-INF/NOTICE*",
+            "/META-INF/INDEX.LIST",
+            "/META-INF/versions/9/OSGI-INF/MANIFEST.MF",
+        )
     }
 }
 
@@ -98,12 +94,20 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 
-    implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
-    implementation("com.google.firebase:firebase-firestore")
+    implementation("androidx.work:work-runtime-ktx:2.10.5")
+
+    // Claude API (runs on the phone with the user's own API key)
+    implementation("com.anthropic:anthropic-java:3.3.0")
+
+    // SVG console logos
+    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+    implementation("io.coil-kt.coil3:coil-svg:3.3.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.16.1")
     testImplementation(composeBom)
     testImplementation("androidx.compose.ui:ui-test-junit4")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("androidx.work:work-testing:2.10.5")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

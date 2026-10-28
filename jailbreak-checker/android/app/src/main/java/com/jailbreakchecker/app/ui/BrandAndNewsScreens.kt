@@ -126,20 +126,18 @@ fun SectionTitle(text: String) {
 
 @Composable
 fun NewsList(
-    news: List<NewsItem>?,
+    news: List<NewsItem>,
     consoles: List<ConsoleInfo>,
-    onlineEnabled: Boolean,
+    hasApiKey: Boolean,
     onConsole: (String) -> Unit,
+    onSettings: () -> Unit,
 ) {
     when {
-        !onlineEnabled -> EmptyNews(
-            "Las noticias llegan desde el servidor de Firebase, que la IA actualiza cada hora. " +
-                "Esta copia de la app no tiene Firebase configurado.",
-        )
-        news == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+        news.isEmpty() && !hasApiKey -> Column(Modifier.padding(16.dp)) {
+            SetupBanner(onSettings)
+            EmptyNews("Las noticias las busca la IA desde tu teléfono. Configúrala en Ajustes para empezar.")
         }
-        news.isEmpty() -> EmptyNews("Todavía no hay noticias. La IA revisa la escena cada hora; vuelve pronto.")
+        news.isEmpty() -> EmptyNews("Todavía no hay noticias. Pulsa el botón de actualizar (arriba) o espera a la próxima revisión automática.")
         else -> {
             val names = consoles.associate { it.id to it.shortName }
             val uri = LocalUriHandler.current

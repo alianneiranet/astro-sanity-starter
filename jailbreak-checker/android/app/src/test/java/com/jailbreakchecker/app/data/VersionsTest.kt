@@ -64,9 +64,23 @@ class VersionsTest {
                 assertTrue("${console.id} firmwares", console.firmwares.isNotEmpty())
             }
             val variantIds = console.variants.map { it.id }.toSet()
+            val guideIds = Repository.json.decodeFromString(GuideCatalog.serializer(), java.io.File("../../data/guides.json").readText())
+                .guides.map { it.id }.toSet()
+            val infos = listOfNotNull(console.allVersions) + console.variants.mapNotNull { it.allVersions }
+            for (info in infos) {
+                assertTrue("${console.id} variant status", Status.parse(info.status) != Status.UNKNOWN)
+                assertTrue("${console.id} guide ${info.guideId}", info.guideId.isBlank() || info.guideId in guideIds)
+            }
+            if (console.mode != "all") {
+                // every model is answered either by a single status or by firmware ranges
+                for (v in console.variants.filter { it.allVersions == null }) {
+                    assertTrue("${console.id}/${v.id} covered", console.firmwares.any { it.variant.isBlank() || it.variant == v.id })
+                }
+            }
             for (fw in console.firmwares) {
                 assertTrue("${fw.id} status", Status.parse(fw.status) != Status.UNKNOWN)
                 assertTrue("${fw.id} variant", fw.variant.isBlank() || fw.variant in variantIds)
+                assertTrue("${fw.id} guide", fw.guideId.isBlank() || fw.guideId in guideIds)
                 if (fw.min.isNotBlank() && fw.max.isNotBlank()) {
                     assertTrue("${fw.id} min<=max", Versions.compare(fw.min, fw.max) <= 0)
                 }

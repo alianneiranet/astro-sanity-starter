@@ -42,6 +42,8 @@ data class StatusInfo(
     val title: String = "",
     val explanation: String = "",
     val method: String = "",
+    /** Id of a [Guide] explaining how to do it; empty if there is none. */
+    val guideId: String = "",
 )
 
 @Serializable
@@ -49,6 +51,8 @@ data class Variant(
     val id: String,
     val name: String,
     val description: String = "",
+    /** When set, this model has one status for every firmware and the firmware question is skipped. */
+    val allVersions: StatusInfo? = null,
 )
 
 @Serializable
@@ -65,6 +69,7 @@ data class FirmwareRange(
     val title: String = "",
     val explanation: String = "",
     val method: String = "",
+    val guideId: String = "",
 ) {
     val isCatchAll: Boolean get() = min.isBlank() && max.isBlank()
 }
@@ -124,4 +129,41 @@ data class UpdaterMeta(
     val lastSuccessAt: String = "",
     val ok: Boolean = true,
     val message: String = "",
+    val lastInputTokens: Long = 0,
+    val lastOutputTokens: Long = 0,
+    val lastSearches: Long = 0,
+)
+
+/** One AI change to a console, kept for the "historial" list. */
+@Serializable
+data class ChangeRecord(
+    val consoleId: String,
+    val at: String,
+    val summary: String,
+)
+
+@Serializable
+data class GuideStep(
+    val title: String,
+    val text: String,
+)
+
+@Serializable
+data class Guide(
+    val id: String,
+    val title: String,
+    val consoleIds: List<String> = emptyList(),
+    /** facil | media | dificil */
+    val difficulty: String = "media",
+    val time: String = "",
+    val summary: String = "",
+    val requirements: List<String> = emptyList(),
+    val steps: List<GuideStep> = emptyList(),
+    val warnings: List<String> = emptyList(),
+    val links: List<Source> = emptyList(),
+)
+
+@Serializable
+data class GuideCatalog(
+    val guides: List<Guide> = emptyList(),
 )

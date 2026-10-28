@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,11 +22,16 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -53,13 +59,23 @@ import androidx.compose.ui.unit.dp
 import com.jailbreakchecker.app.data.Brand
 import com.jailbreakchecker.app.data.ConsoleInfo
 import com.jailbreakchecker.app.data.FirmwareRange
+import com.jailbreakchecker.app.data.Guide
 import com.jailbreakchecker.app.data.Status
 import com.jailbreakchecker.app.data.StatusInfo
 import com.jailbreakchecker.app.data.Versions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConsoleScreen(console: ConsoleInfo?, brand: Brand?, onBack: () -> Unit) {
+fun ConsoleScreen(
+    console: ConsoleInfo?,
+    brand: Brand?,
+    guides: Map<String, Guide>,
+    hasApiKey: Boolean,
+    reviewing: Boolean,
+    onBack: () -> Unit,
+    onGuide: (String) -> Unit,
+    onReview: () -> Unit,
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -80,7 +96,9 @@ fun ConsoleScreen(console: ConsoleInfo?, brand: Brand?, onBack: () -> Unit) {
         var expanded by rememberSaveable(console.id) { mutableStateOf<String?>(null) }
 
         val needsVariant = console.asksFirmware && console.variants.size > 1 && variantId == null
+        val selectedVariant = console.variants.firstOrNull { it.id == variantId }
         val ranges = console.rangesFor(variantId)
+        val guideFor: (String) -> Guide? = { id -> guides[id] }
         val match = if (query.isBlank()) null else Versions.match(query, ranges)
 
         LazyColumn(
@@ -96,6 +114,9 @@ fun ConsoleScreen(console: ConsoleInfo?, brand: Brand?, onBack: () -> Unit) {
                 item {
                     AllVersionsCard(
                         console.allVersions ?: StatusInfo(console.summary.status, console.summary.text),
+                        "No hace falta elegir firmware",
+                        guideFor,
+                        onGuide,
                     )
                 }
             } else {
@@ -129,7 +150,12 @@ fun ConsoleScreen(console: ConsoleInfo?, brand: Brand?, onBack: () -> Unit) {
                                         )
                                     }
                                 }
+                                variant.allVersions?.let {
+                                    Spacer(Modifier.width(8.dp))
+                                    StatusPill(Status.parse(it.status))
+                                }
                                 if (selected) {
+                                    Spacer(Modifier.width(6.dp))
                                     Icon(Icons.Outlined.CheckCircle, null, tint = MaterialTheme.colorScheme.primary)
                                 }
                             }
@@ -137,7 +163,11 @@ fun ConsoleScreen(console: ConsoleInfo?, brand: Brand?, onBack: () -> Unit) {
                     }
                 }
 
-                if (!needsVariant) {
+                if (selectedVariant?.allVersions != null) {
+                    item {
+                        AllVersionsCard(selectedVariant.allVersions, "Con este modelo no importa el firmware", guideFor, onGuide)
+                    }
+                } else if (!needsVariant) {
                     item {
                         StepTitle(if (console.variants.size > 1) 2 else 1, "¿Qué firmware tienes?")
                         if (console.versionHint.isNotBlank()) {
@@ -178,7 +208,9 @@ fun ConsoleScreen(console: ConsoleInfo?, brand: Brand?, onBack: () -> Unit) {
                             range = range,
                             expanded = expanded == range.id || match?.id == range.id,
                             highlighted = match?.id == range.id,
+                            guide = guideFor(range.guideId),
                             onClick = { expanded = if (expanded == range.id) null else range.id },
+                            onGuide = onGuide,
                         )
                     }
                 }
@@ -186,6 +218,21 @@ fun ConsoleScreen(console: ConsoleInfo?, brand: Brand?, onBack: () -> Unit) {
 
             if (console.sources.isNotEmpty()) {
                 item { SourcesCard(console) }
+            }
+            if (hasApiKey) {
+                item {
+                    OutlinedButton(onClick = onReview, enabled = !reviewing, modifier = Modifier.fillMaxWidth()) {
+                        if (reviewing) {
+                            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                            Spacer(Modifier.width(10.dp))
+                            Text("La IA está revisando esta consola…")
+                        } else {
+                            Icon(Icons.Outlined.AutoAwesome, null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Revisar esta consola con IA ahora")
+                        }
+                    }
+                }
             }
             item {
                 val checked = console.lastCheckedAt.ifBlank { console.updatedAt }
@@ -210,7 +257,7 @@ fun ConsoleScreen(console: ConsoleInfo?, brand: Brand?, onBack: () -> Unit) {
 private fun Header(console: ConsoleInfo, brand: Brand?) {
     val status = Status.parse(console.summary.status)
     Row(verticalAlignment = Alignment.CenterVertically) {
-        ConsoleIcon(console.formFactor, parseHexColor(brand?.color ?: "#455A64"), size = 84.dp)
+        ConsoleLogo(console.id, console.formFactor, parseHexColor(brand?.color ?: "#455A64"), size = 84.dp, width = 110.dp)
         Spacer(Modifier.width(16.dp))
         Column(Modifier.weight(1f)) {
             Text(console.name, style = MaterialTheme.typography.headlineSmall)
@@ -251,7 +298,12 @@ private fun StepTitle(number: Int, text: String) {
 }
 
 @Composable
-private fun AllVersionsCard(info: StatusInfo) {
+private fun AllVersionsCard(
+    info: StatusInfo,
+    heading: String,
+    guideFor: (String) -> Guide?,
+    onGuide: (String) -> Unit,
+) {
     val status = Status.parse(info.status)
     Card(
         shape = RoundedCornerShape(20.dp),
@@ -260,7 +312,7 @@ private fun AllVersionsCard(info: StatusInfo) {
     ) {
         Column(Modifier.padding(18.dp)) {
             Text(
-                "No hace falta elegir firmware",
+                heading,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -281,6 +333,7 @@ private fun AllVersionsCard(info: StatusInfo) {
                 Spacer(Modifier.height(10.dp))
                 MethodLine(info.method)
             }
+            guideFor(info.guideId)?.let { GuideButton(it, onGuide) }
         }
     }
 }
@@ -319,7 +372,14 @@ private fun MatchResult(query: String, match: FirmwareRange?) {
 }
 
 @Composable
-private fun FirmwareRow(range: FirmwareRange, expanded: Boolean, highlighted: Boolean, onClick: () -> Unit) {
+private fun FirmwareRow(
+    range: FirmwareRange,
+    expanded: Boolean,
+    highlighted: Boolean,
+    guide: Guide?,
+    onClick: () -> Unit,
+    onGuide: (String) -> Unit,
+) {
     val status = Status.parse(range.status)
     Card(
         onClick = onClick,
@@ -356,6 +416,7 @@ private fun FirmwareRow(range: FirmwareRange, expanded: Boolean, highlighted: Bo
                         Spacer(Modifier.height(10.dp))
                         MethodLine(range.method)
                     }
+                    guide?.let { GuideButton(it, onGuide) }
                 }
             }
         }
@@ -399,5 +460,14 @@ private fun SourcesCard(console: ConsoleInfo) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun GuideButton(guide: Guide, onGuide: (String) -> Unit) {
+    Button(onClick = { onGuide(guide.id) }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
+        Icon(Icons.AutoMirrored.Outlined.MenuBook, null)
+        Spacer(Modifier.width(8.dp))
+        Text("Ver guía: cómo hacerlo")
     }
 }

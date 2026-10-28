@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Monochrome gamepad for the status bar. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M7,7h10c2.8,0 4.6,2.1 5,4.8l0.8,5.2c0.3,2.2 -2.3,3.4 -3.9,1.8l-2.4,-2.4h-9l-2.4,2.4c-1.6,1.6 -4.2,0.4 -3.9,-1.8l0.8,-5.2C2.4,9.1 4.2,7 7,7zM6,10v1.5H4.5v1.5H6v1.5h1.5V13H9v-1.5H7.5V10H6zM16.5,10a1,1 0,1 0,0 2a1,1 0,1 0,0 -2zM18.5,12a1,1 0,1 0,0 2a1,1 0,1 0,0 -2z" />
+</vector>

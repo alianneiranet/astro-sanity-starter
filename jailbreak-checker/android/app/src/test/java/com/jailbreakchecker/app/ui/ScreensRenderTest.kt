@@ -1,15 +1,20 @@
 package com.jailbreakchecker.app.ui
 
 import android.graphics.Bitmap
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.activity.ComponentActivity
 import android.graphics.Canvas
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.hasSetTextAction
+import com.jailbreakchecker.app.data.AppSettings
 import com.jailbreakchecker.app.data.Catalog
+import com.jailbreakchecker.app.data.GuideCatalog
 import com.jailbreakchecker.app.data.Repository
+import com.jailbreakchecker.app.data.UpdaterMeta
 import com.jailbreakchecker.app.ui.theme.JailbreakTheme
 import org.junit.Rule
 import org.junit.Test
@@ -20,7 +25,7 @@ import org.robolectric.annotation.GraphicsMode
 import java.io.File
 
 /**
- * Renders the main screens with the bundled catalog. Catches crashes in the UI code and
+ * Renders the main screens with the bundled data. Catches crashes in the UI code and
  * writes PNG snapshots to app/build/screenshots for a quick visual check.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -34,6 +39,18 @@ class ScreensRenderTest {
     private val catalog: Catalog by lazy {
         Repository.json.decodeFromString(Catalog.serializer(), File("../../data/consoles.json").readText())
     }
+    private val guides by lazy {
+        Repository.json.decodeFromString(GuideCatalog.serializer(), File("../../data/guides.json").readText()).guides.associateBy { it.id }
+    }
+    private val logoIds by lazy {
+        File("../../data/logos").listFiles().orEmpty().map { it.name.removeSuffix(".svg") }.toSet()
+    }
+
+    private fun show(content: @Composable () -> Unit) = compose.setContent {
+        JailbreakTheme(darkTheme = true) {
+            CompositionLocalProvider(LocalLogoIds provides logoIds) { content() }
+        }
+    }
 
     private fun snapshot(name: String) {
         val dir = File("build/screenshots").apply { mkdirs() }
@@ -44,58 +61,67 @@ class ScreensRenderTest {
         File(dir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
+    private fun console(id: String) = catalog.consoles.first { it.id == id }
+    private fun brand(id: String) = catalog.brands.first { it.id == id }
+
     @Test
     fun home() {
-        compose.setContent {
-            JailbreakTheme(darkTheme = true) {
-                HomeScreen(catalog.brands, catalog.consoles, null, null, false, {}, {})
-            }
-        }
-        compose.onNodeWithText("Nintendo").assertExists()
+        show { HomeScreen(catalog.brands, catalog.consoles, emptyList(), UpdaterMeta(), guides.values.toList(), false, false, {}, {}, {}, {}, {}) }
+        compose.onNodeWithText("Activa la búsqueda con IA").assertExists()
         snapshot("home")
     }
 
     @Test
     fun brand() {
-        compose.setContent {
-            JailbreakTheme(darkTheme = true) {
-                BrandScreen(catalog.brands.first { it.id == "nintendo" }, catalog.consoles.filter { it.brandId == "nintendo" }, {}, {})
-            }
-        }
+        show { BrandScreen(brand("nintendo"), catalog.consoles.filter { it.brandId == "nintendo" }, {}, {}) }
         compose.onNodeWithText("Nintendo Switch 2").assertExists()
         snapshot("brand-nintendo")
     }
 
     @Test
     fun ps5WithVersionSearch() {
-        val ps5 = catalog.consoles.first { it.id == "ps5" }
-        compose.setContent {
-            JailbreakTheme(darkTheme = true) { ConsoleScreen(ps5, catalog.brands.first { it.id == "sony" }, {}) }
-        }
+        show { ConsoleScreen(console("ps5"), brand("sony"), guides, true, false, {}, {}, {}) }
         compose.onNode(hasSetTextAction()).performTextInput("9.60")
         compose.onNodeWithText("Tu versión 9.60").assertExists()
         snapshot("console-ps5")
     }
 
     @Test
-    fun switchAsksModelFirst() {
-        val sw = catalog.consoles.first { it.id == "switch1" }
-        compose.setContent {
-            JailbreakTheme(darkTheme = true) { ConsoleScreen(sw, catalog.brands.first { it.id == "nintendo" }, {}) }
-        }
+    fun switchV2SaysModchipOnlyWithoutAskingFirmware() {
+        show { ConsoleScreen(console("switch1"), brand("nintendo"), guides, false, false, {}, {}, {}) }
         compose.onNodeWithText("¿Qué modelo tienes?").assertExists()
-        compose.onNodeWithText("V1 parcheada, V2, Lite u OLED").performClick()
+        compose.onNodeWithText("V2, Lite u OLED").performClick()
+        compose.onNodeWithText("Con este modelo no importa el firmware").assertExists()
+        compose.onNodeWithText("Solo con modchip (hay que abrirla)").assertExists()
+        compose.onNodeWithText("¿Qué firmware tienes?").assertDoesNotExist()
+        snapshot("console-switch1-v2")
+    }
+
+    @Test
+    fun switchPatchedV1AsksFirmware() {
+        show { ConsoleScreen(console("switch1"), brand("nintendo"), guides, false, false, {}, {}, {}) }
+        compose.onNodeWithText("V1 parcheada (finales de 2018–2019)").performClick()
         compose.onNodeWithText("¿Qué firmware tienes?").assertExists()
-        snapshot("console-switch1")
     }
 
     @Test
     fun ps1SkipsFirmwareQuestion() {
-        val ps1 = catalog.consoles.first { it.id == "ps1" }
-        compose.setContent {
-            JailbreakTheme(darkTheme = true) { ConsoleScreen(ps1, catalog.brands.first { it.id == "sony" }, {}) }
-        }
+        show { ConsoleScreen(console("ps1"), brand("sony"), guides, false, false, {}, {}, {}) }
         compose.onNodeWithText("No hace falta elegir firmware").assertExists()
         snapshot("console-ps1")
+    }
+
+    @Test
+    fun guide() {
+        show { GuideScreen(guides["switch-rcm"], {}) }
+        compose.onNodeWithText("Qué necesitas").assertExists()
+        snapshot("guide-switch-rcm")
+    }
+
+    @Test
+    fun settings() {
+        show { SettingsScreen(AppSettings(), UpdaterMeta(), false, {}, { _, _ -> null }, {}, {}, {}) }
+        compose.onNodeWithText("Guardar y comprobar").assertExists()
+        snapshot("settings")
     }
 }
