@@ -52,7 +52,9 @@ private fun AppNavigation(viewModel: MainViewModel) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val running by viewModel.running.collectAsStateWithLifecycle()
     val brands = viewModel.brands
-    val guides = viewModel.guides.associateBy { it.id }
+    val guideList by viewModel.guides.collectAsStateWithLifecycle()
+    val guides = guideList.associateBy { it.id }
+    val updatingGuides = running.filter { it.startsWith("guide:") }.map { it.removePrefix("guide:") }.toSet()
 
     NavHost(navController = nav, startDestination = "home") {
         composable("home") {
@@ -61,7 +63,9 @@ private fun AppNavigation(viewModel: MainViewModel) {
                 consoles = consoles,
                 news = news,
                 meta = meta,
-                guides = viewModel.guides,
+                guides = guideList,
+                updatingGuides = updatingGuides,
+                onUpdateAllGuides = viewModel::updateAllGuides,
                 hasApiKey = settings.hasApiKey,
                 searching = "scan" in running,
                 onBrand = { nav.navigate("brand/$it") },
@@ -95,7 +99,15 @@ private fun AppNavigation(viewModel: MainViewModel) {
             )
         }
         composable("guide/{guideId}") { entry ->
-            GuideScreen(guides[entry.arguments?.getString("guideId")], onBack = { nav.popBackStack() })
+            val guideId = entry.arguments?.getString("guideId").orEmpty()
+            GuideScreen(
+                guide = guides[guideId],
+                hasApiKey = settings.hasApiKey,
+                updating = guideId in updatingGuides,
+                onUpdate = { viewModel.updateGuides(listOf(guideId)) },
+                onSettings = { nav.navigate("settings") },
+                onBack = { nav.popBackStack() },
+            )
         }
         composable("settings") {
             SettingsScreen(

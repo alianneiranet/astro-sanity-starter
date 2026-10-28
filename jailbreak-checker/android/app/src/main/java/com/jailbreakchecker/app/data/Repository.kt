@@ -20,10 +20,18 @@ class Repository(private val context: Context) {
 
     val bundled: Catalog by lazy { loadCatalog(context) }
 
-    val guides: List<Guide> by lazy {
+    /** Guides as shipped with the app (the AI may have newer versions, see [guides]). */
+    val bundledGuides: List<Guide> by lazy {
         val text = context.assets.open("guides.json").bufferedReader().use { it.readText() }
         json.decodeFromString(GuideCatalog.serializer(), text).guides
     }
+
+    val feedSources: List<FeedSource> by lazy {
+        val text = context.assets.open("sources.json").bufferedReader().use { it.readText() }
+        json.decodeFromString(FeedSourceList.serializer(), text).sources
+    }
+
+    fun guides(): Flow<List<Guide>> = store.state.map { mergeGuides(bundledGuides, it) }
 
     /** Console ids that have an SVG logo in assets/logos. */
     val logoIds: Set<String> by lazy {
@@ -62,6 +70,9 @@ class Repository(private val context: Context) {
             is Iterable<*> -> JsonArray(value.map { toJsonElement(it) })
             else -> JsonPrimitive(value.toString())
         }
+
+        fun mergeGuides(bundled: List<Guide>, state: LocalState): List<Guide> =
+            bundled.map { state.guides[it.id] ?: it }
 
         /**
          * An AI-updated console wins only while it is newer than the bundled one, so a new

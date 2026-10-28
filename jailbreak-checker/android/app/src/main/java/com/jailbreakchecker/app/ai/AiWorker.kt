@@ -23,9 +23,9 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.anthropic.errors.AnthropicServiceException
-import com.anthropic.errors.UnauthorizedException
 import com.jailbreakchecker.app.MainActivity
 import com.jailbreakchecker.app.R
+import com.jailbreakchecker.app.data.FeedFetcher
 import com.jailbreakchecker.app.data.LocalStore
 import com.jailbreakchecker.app.data.Repository
 import com.jailbreakchecker.app.data.SettingsStore
@@ -38,50 +38,70 @@ class AiWorker(context: Context, params: WorkerParameters) : CoroutineWorker(con
 
     override suspend fun doWork(): Result {
         val settings = SettingsStore.get(applicationContext).settings.value
-        if (!settings.hasApiKey) return Result.success()
         val store = LocalStore.get(applicationContext)
         val repo = Repository(applicationContext)
-        val updater = Updater(store, repo.bundled.consoles, repo.guides, ClaudeRunner(settings.apiKey, settings.model))
+        val runner = if (settings.hasApiKey) ClaudeRunner(settings.apiKey, settings.model) else null
+        val updater = Updater(store, repo.bundled.consoles, repo.bundledGuides, runner)
+        val consoleId = inputData.getString(KEY_CONSOLE)
+        val guideId = inputData.getString(KEY_GUIDE)
 
         return try {
-            when (val consoleId = inputData.getString(KEY_CONSOLE)) {
-                null -> {
-                    val outcome = updater.scan()
-                    if (outcome.newNews.isNotEmpty() && settings.notifications) {
-                        notify(
-                            applicationContext,
-                            NOTIFY_NEWS,
-                            if (outcome.newNews.size == 1) "Nueva noticia de jailbreak" else "${outcome.newNews.size} noticias nuevas de jailbreak",
-                            outcome.newNews.first().title,
-                        )
+            when {
+                guideId != null -> {
+                    if (runner == null) return Result.success()
+                    val change = updater.updateGuide(guideId)
+                    if (change != null && settings.notifications && inputData.getBoolean(KEY_NOTIFY_GUIDE, false)) {
+                        notify(applicationContext, guideId.hashCode(), "Guía actualizada", change)
                     }
-                    enqueueReviews(applicationContext, outcome.toReview)
                 }
-                else -> {
+                consoleId != null -> {
+                    if (runner == null) return Result.success()
                     val change = updater.review(consoleId, inputData.getString(KEY_REASON).orEmpty())
                     if (change != null && settings.notifications) {
                         val name = repo.bundled.consoles.firstOrNull { it.id == consoleId }?.name ?: consoleId
                         notify(applicationContext, consoleId.hashCode(), "$name: estado actualizado", change)
                     }
                 }
+                else -> {
+                    // 1) free sources, always (no API key, no cost)
+                    val fromFeeds = runCatching { updater.fetchFeeds(FeedFetcher(), repo.feedSources) }.getOrDefault(emptyList())
+                    // 2) the AI scan, only with an API key; a failure here doesn't lose the free news
+                    var fromAi = emptyList<com.jailbreakchecker.app.data.NewsItem>()
+                    if (runner != null) {
+                        try {
+                            val outcome = updater.scan()
+                            fromAi = outcome.newNews
+                            enqueueReviews(applicationContext, outcome.toReview)
+                        } catch (e: Exception) {
+                            Log.w(TAG, "AI scan failed", e)
+                            fail(store, ClaudeRunner.explain(e))
+                        }
+                    }
+                    val fresh = fromAi + fromFeeds
+                    if (fresh.isNotEmpty() && settings.notifications) {
+                        notify(
+                            applicationContext,
+                            NOTIFY_NEWS,
+                            if (fresh.size == 1) "Nueva noticia" else "${fresh.size} noticias nuevas",
+                            fresh.first().title,
+                        )
+                    }
+                }
             }
             Result.success()
-        } catch (e: UnauthorizedException) {
-            fail(store, "La API key no es válida. Revísala en Ajustes.")
-            Result.failure()
-        } catch (e: AnthropicServiceException) {
-            fail(store, "Error de la API (${e.statusCode()}): ${e.message?.take(160)}")
-            if (e.statusCode() == 429 || e.statusCode() >= 500) Result.retry() else Result.failure()
-        } catch (e: IOException) {
-            fail(store, "Sin conexión: se intentará de nuevo.")
-            Result.retry()
         } catch (e: Schemas.InvalidUpdate) {
-            // Keep the old data; the console stays due and is retried on a later run.
+            // Keep the old data; it is retried on a later run.
             Log.w(TAG, "Rejected AI update", e)
             Result.success()
+        } catch (e: AnthropicServiceException) {
+            fail(store, ClaudeRunner.explain(e))
+            if (e.statusCode() == 429 || e.statusCode() >= 500) Result.retry() else Result.failure()
+        } catch (e: IOException) {
+            fail(store, ClaudeRunner.explain(e))
+            Result.retry()
         } catch (e: Exception) {
-            Log.e(TAG, "AI check failed", e)
-            fail(store, "Error: ${e.message?.take(160)}")
+            Log.e(TAG, "AI task failed", e)
+            fail(store, ClaudeRunner.explain(e))
             Result.failure()
         }
     }
@@ -96,6 +116,9 @@ class AiWorker(context: Context, params: WorkerParameters) : CoroutineWorker(con
         const val TAG_AI = "jb-ai"
         private const val KEY_CONSOLE = "consoleId"
         private const val KEY_REASON = "reason"
+        private const val KEY_GUIDE = "guideId"
+        private const val KEY_NOTIFY_GUIDE = "notifyGuide"
+        private const val GUIDES = "jb-guides"
         private const val PERIODIC = "jb-periodic"
         private const val MANUAL = "jb-manual"
         private const val REVIEWS = "jb-reviews"
@@ -108,7 +131,8 @@ class AiWorker(context: Context, params: WorkerParameters) : CoroutineWorker(con
         fun schedule(context: Context) {
             val settings = SettingsStore.get(context).settings.value
             val wm = runCatching { WorkManager.getInstance(context) }.getOrNull() ?: return
-            if (!settings.hasApiKey || settings.intervalHours <= 0) {
+            // Free sources work without an API key, so the periodic check only depends on the interval.
+            if (settings.intervalHours <= 0) {
                 wm.cancelUniqueWork(PERIODIC)
                 return
             }
@@ -128,6 +152,22 @@ class AiWorker(context: Context, params: WorkerParameters) : CoroutineWorker(con
                 .addTag("manual")
                 .build()
             WorkManager.getInstance(context).enqueueUniqueWork(MANUAL, ExistingWorkPolicy.KEEP, request)
+        }
+
+        /** "Actualizar guías": one background job per guide, run one after another. */
+        fun updateGuides(context: Context, guideIds: List<String>) {
+            if (guideIds.isEmpty()) return
+            val requests = guideIds.map { id ->
+                OneTimeWorkRequestBuilder<AiWorker>()
+                    .setConstraints(constraints)
+                    .setInputData(workDataOf(KEY_GUIDE to id, KEY_NOTIFY_GUIDE to (guideIds.size == 1)))
+                    .addTag(TAG_AI)
+                    .addTag("guide-$id")
+                    .build()
+            }
+            WorkManager.getInstance(context).beginUniqueWork(GUIDES, ExistingWorkPolicy.APPEND_OR_REPLACE, requests.first())
+                .let { requests.drop(1).fold(it) { chain, r -> chain.then(r) } }
+                .enqueue()
         }
 
         /** "Revisar esta consola ahora" from the console screen. */

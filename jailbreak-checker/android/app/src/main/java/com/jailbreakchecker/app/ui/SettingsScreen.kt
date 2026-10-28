@@ -113,8 +113,9 @@ fun SettingsScreen(
         ) {
             item {
                 Text(
-                    "La app busca las novedades ella misma: usa Claude (de Anthropic) con búsqueda web directamente desde tu teléfono, sin ningún servidor. " +
-                        "Para eso necesitas tu propia API key de Anthropic. Se guarda cifrada en este teléfono y solo se envía a api.anthropic.com.",
+                    "Las noticias, emuladores y herramientas nuevas se leen GRATIS de las webs de la escena y de GitHub, sin API key. " +
+                        "La IA (Claude, de Anthropic) es opcional: actualiza el estado de cada consola y las guías. Necesita tu propia API key con saldo " +
+                        "(se recarga desde 5 US$ en console.anthropic.com → Billing). Se guarda cifrada en este teléfono y solo se envía a api.anthropic.com.",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 TextButton(onClick = { runCatching { uri.openUri("https://console.anthropic.com/settings/keys") } }, contentPadding = PaddingValues(0.dp)) {
@@ -192,7 +193,14 @@ fun SettingsScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             RadioButton(selected = settings.model == id, onClick = { onSave(settings.copy(model = id)) })
-                            Text(label, style = MaterialTheme.typography.bodyMedium)
+                            Column {
+                                Text(label, style = MaterialTheme.typography.bodyMedium)
+                                Text(
+                                    "~${money(costPerCheck(id))} por búsqueda",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
                     }
                 }
@@ -212,10 +220,10 @@ fun SettingsScreen(
                     val perDay = if (settings.intervalHours > 0) 24.0 / settings.intervalHours else 0.0
                     val daily = perDay * costPerCheck(settings.model) + if (perDay > 0) 8 * costPerCheck(settings.model) * 1.3 else 0.0
                     Text(
-                        if (perDay > 0) {
-                            "Coste aproximado en tu cuenta de Anthropic: ~${money(costPerCheck(settings.model))} por búsqueda, unos ${money(daily)} al día con esta frecuencia. Es una estimación: revisa el consumo real en console.anthropic.com."
-                        } else {
-                            "Sin revisión automática: solo buscará cuando pulses \"Buscar novedades ahora\" (~${money(costPerCheck(settings.model))} cada vez)."
+                        when {
+                            perDay == 0.0 -> "Sin revisión automática: solo busca cuando pulses \"Buscar novedades ahora\"."
+                            !settings.hasApiKey -> "Sin API key solo se leen las fuentes gratuitas: no cuesta nada."
+                            else -> "Fuentes gratuitas: 0 US$. IA: ~${money(costPerCheck(settings.model))} por búsqueda, unos ${money(daily)} al día con esta frecuencia (estimación; revisa el consumo real en console.anthropic.com)."
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -239,16 +247,23 @@ fun SettingsScreen(
 
             item {
                 SettingsCard("Estado") {
-                    val last = meta.lastRunAt.takeIf { it.isNotBlank() }
+                    val feeds = meta.feedsCheckedAt.takeIf { it.isNotBlank() }
                     Text(
                         when {
                             running -> "Buscando novedades ahora…"
-                            last == null -> "Todavía no se ha hecho ninguna búsqueda."
-                            meta.ok -> "Última búsqueda ${relativeTime(last)}: correcta."
-                            else -> "Última búsqueda ${relativeTime(last)}: ${meta.message}"
+                            feeds == null -> "Fuentes gratuitas: todavía no se han leído."
+                            meta.feedsFailed.isEmpty() -> "Fuentes gratuitas: leídas ${relativeTime(feeds)}."
+                            else -> "Fuentes gratuitas: leídas ${relativeTime(feeds)} (sin respuesta: ${meta.feedsFailed.take(4).joinToString()})."
                         },
-                        color = if (!running && last != null && !meta.ok) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
                     )
+                    val last = meta.lastRunAt.takeIf { it.isNotBlank() && settings.hasApiKey }
+                    if (last != null && !running) {
+                        Text(
+                            if (meta.ok) "IA: última búsqueda ${relativeTime(last)}, correcta." else "IA: ${meta.message}",
+                            color = if (meta.ok) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                    }
                     if (meta.lastInputTokens > 0) {
                         Text(
                             "Uso de la última búsqueda: ${meta.lastInputTokens} tokens de entrada, ${meta.lastOutputTokens} de salida, ${meta.lastSearches} búsquedas web.",
@@ -258,7 +273,7 @@ fun SettingsScreen(
                         )
                     }
                     Spacer(Modifier.height(10.dp))
-                    Button(onClick = onRunNow, enabled = settings.hasApiKey && !running, modifier = Modifier.fillMaxWidth()) {
+                    Button(onClick = onRunNow, enabled = !running, modifier = Modifier.fillMaxWidth()) {
                         Text(if (running) "Buscando…" else "Buscar novedades ahora")
                     }
                     OutlinedButton(onClick = onClearAi, modifier = Modifier.fillMaxWidth().padding(top = 6.dp)) {

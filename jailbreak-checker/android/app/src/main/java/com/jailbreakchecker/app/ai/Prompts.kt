@@ -25,8 +25,8 @@ $STATUS_RULES
 
 ${SOURCE_RULES.replace("{{today}}", today)}
 
-Workflow: run a few targeted web searches (newest PS5, PS4, Switch 2, Switch, Xbox and PS3 exploit news, plus a general "console jailbreak news this week" search), compare with the stored catalog in the user message, then call report_scan exactly once.
-- Only include news items that are new compared with the "already published" list and relevant to a catalog console.
+Workflow: run a few targeted web searches (newest PS5, PS4, Switch 2, Switch, Xbox and PS3 exploit news; new releases of scene tools such as Atmosphère, GoldHEN, etaHEN, Luma3DS; and console emulator news such as shadPS4, RPCS3, Eden/Citron/Ryujinx forks, Azahar, Dolphin, PCSX2, Xenia, Vita3K), compare with the stored catalog in the user message, then call report_scan exactly once.
+- Only include news items that are new compared with the "already published" list. Classify each as jailbreak, emuladores or herramientas.
 - Put a console in consoles_to_review only when its stored data is now outdated or wrong (new exploit released, firmware patched, new official firmware, a tool added support for more versions, wrong information...).
 - Reporting nothing is completely fine."""
 
@@ -79,4 +79,21 @@ Search for the current jailbreak situation of this console (latest official firm
         }
         "- ${c.id} (${c.name}): ${c.summary.text} | latest ${c.latestFirmware.ifBlank { "n/a" }} | ${parts.joinToString("; ")}"
     }
+}
+
+fun Prompts.guideSystem(today: String) = """You keep the step-by-step guides of "Revisor de Jailbreak" accurate and current. The readers are non-technical console owners who want to run homebrew or back up their own games.
+
+Research rules:
+- Today is $today. Check the official sources for the method: the tool's GitHub repository and latest release, and the canonical community guide (switch.hacks.guide, 3ds.hacks.guide, wiiu.hacks.guide, wii.hacks.guide, vita.hacks.guide, dsi.cfw.guide, ConsoleMods wiki, the project README...).
+- Make every step exact and complete: real menu paths, file and folder names, current tool versions, supported firmware range. Remove steps that no longer apply.
+- Links must be official (project GitHub/releases pages or the canonical guide). Never link piracy sites, ROM/ISO downloads, sigpatches or paid "jailbreak" services.
+- Never invent versions, file names or URLs. If you can't confirm something, keep the current text.
+- Write in neutral Spanish, short clear sentences. Mention backups (NAND/EEPROM) and ban risks where relevant."""
+
+fun Prompts.guidePrompt(guide: com.jailbreakchecker.app.data.Guide): String {
+    val current = com.jailbreakchecker.app.data.Repository.json.encodeToString(com.jailbreakchecker.app.data.Guide.serializer(), guide)
+    return """Guide to review (JSON):
+$current
+
+Search for the latest official information about this method and call submit_guide_update with the complete, corrected guide."""
 }

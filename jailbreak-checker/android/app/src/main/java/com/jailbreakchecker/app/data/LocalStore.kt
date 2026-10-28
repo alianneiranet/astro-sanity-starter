@@ -19,6 +19,8 @@ data class LocalState(
     /** When each console was last reviewed by the AI (ISO-8601), by id. */
     val lastChecked: Map<String, String> = emptyMap(),
     val news: List<NewsItem> = emptyList(),
+    /** Guides rewritten by the AI, by id. */
+    val guides: Map<String, Guide> = emptyMap(),
     val history: List<ChangeRecord> = emptyList(),
     val meta: UpdaterMeta = UpdaterMeta(),
 )

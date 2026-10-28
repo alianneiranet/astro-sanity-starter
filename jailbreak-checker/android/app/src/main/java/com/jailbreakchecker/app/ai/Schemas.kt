@@ -57,7 +57,35 @@ object Schemas {
             .build()
     }
 
+    val CATEGORIES = listOf("jailbreak", "emuladores", "herramientas")
     const val REPORT_SCAN = "report_scan"
+    const val SUBMIT_GUIDE = "submit_guide_update"
+
+    val submitGuideTool: BetaTool = tool(
+        SUBMIT_GUIDE,
+        "Submit the complete, up-to-date version of the guide. Call exactly once. If nothing needs to change, set changed=false and resend the current guide.",
+        obj(
+            listOf("changed", "change_summary", "title", "difficulty", "time", "summary", "requirements", "steps", "warnings", "links"),
+            mapOf(
+                "changed" to mapOf("type" to "boolean", "description" to "true if any step, requirement, tool version or link changed"),
+                "change_summary" to str("Spanish, one sentence: what changed"),
+                "title" to str("Spanish title"),
+                "difficulty" to mapOf("type" to "string", "enum" to listOf("facil", "media", "dificil"), "description" to "Difficulty for a non-technical user"),
+                "time" to str("Approximate time, e.g. '30 min'"),
+                "summary" to str("2-3 Spanish sentences: what the method does and its limits"),
+                "requirements" to array(mapOf("type" to "string"), "Everything needed (hardware, cables, PC, SD size and format, firmware range...)"),
+                "steps" to array(
+                    obj(listOf("title", "text"), mapOf("title" to str("Short step title"), "text" to str("Exact, complete instructions in Spanish, including menu paths, file names and folders"))),
+                    "Ordered steps, complete enough to follow without another guide (4-14 steps)",
+                ),
+                "warnings" to array(mapOf("type" to "string"), "Risks: bans, bricks, updates to avoid, scams"),
+                "links" to array(
+                    obj(listOf("title", "url"), mapOf("title" to str("Link title"), "url" to str("Official https URL (project GitHub/releases page or the canonical guide)"))),
+                    "2-6 official links: downloads and the full guide",
+                ),
+            ),
+        ),
+    )
     const val SUBMIT_CONSOLE = "submit_console_update"
 
     val reportScanTool: BetaTool = tool(
@@ -68,9 +96,14 @@ object Schemas {
             mapOf(
                 "news" to array(
                     obj(
-                        listOf("title", "summary", "console_ids", "status", "url", "source", "published_date"),
+                        listOf("title", "summary", "category", "console_ids", "status", "url", "source", "published_date"),
                         mapOf(
                             "title" to str("Headline in Spanish, max ~90 characters"),
+                            "category" to mapOf(
+                                "type" to "string",
+                                "enum" to CATEGORIES,
+                                "description" to "jailbreak = exploits/CFW/homebrew; emuladores = emulator news/releases; herramientas = new versions of scene tools (Atmosphère, GoldHEN, etaHEN...)",
+                            ),
                             "summary" to str("1-2 sentences in Spanish: what changed and for which firmware/models"),
                             "console_ids" to mapOf("type" to "array", "items" to mapOf("type" to "string"), "description" to "Catalog console ids affected"),
                             "status" to statusEnum("Status this news implies for the affected firmware"),
@@ -79,7 +112,7 @@ object Schemas {
                             "published_date" to str("YYYY-MM-DD"),
                         ),
                     ),
-                    "New, relevant, verified news not already published. Max 8.",
+                    "New, relevant, verified news not already published (jailbreaks, emulators and scene tools). Max 10.",
                 ),
                 "consoles_to_review" to array(
                     obj(listOf("console_id", "reason"), mapOf("console_id" to str("Catalog console id"), "reason" to str("Why the stored data looks outdated"))),
@@ -170,7 +203,7 @@ object Schemas {
 
     fun parseScan(input: JsonElement, knownIds: Set<String>, now: String): ScanResult {
         val root = input as? JsonObject ?: return ScanResult(emptyList(), emptyList())
-        val news = root.array("news").take(8).mapNotNull { n ->
+        val news = root.array("news").take(10).mapNotNull { n ->
             val ids = (n["console_ids"] as? JsonArray).orEmpty()
                 .mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.trim() }
                 .filter { it in knownIds }
@@ -183,8 +216,11 @@ object Schemas {
                 source = n.text("source", 60),
                 publishedAt = n.text("published_date", 10).takeIf { Regex("\\d{4}-\\d{2}-\\d{2}").matches(it) }.orEmpty(),
                 createdAt = now,
+                category = n.text("category").takeIf { it in CATEGORIES } ?: "jailbreak",
+                origin = "ia",
             )
-            item.takeIf { it.title.isNotBlank() && it.summary.isNotBlank() && it.consoleIds.isNotEmpty() }
+            // Jailbreak news must name a console; emulator/tool news may be general.
+            item.takeIf { it.title.isNotBlank() && it.summary.isNotBlank() && (it.consoleIds.isNotEmpty() || it.category != "jailbreak") }
         }
         val review = root.array("consoles_to_review")
             .map { it.text("console_id", 40) to it.text("reason", 300) }
@@ -283,4 +319,41 @@ object Schemas {
             ),
         )
     }
+}
+
+/** Validated AI rewrite of a guide. */
+data class GuideUpdate(val changed: Boolean, val changeSummary: String, val guide: com.jailbreakchecker.app.data.Guide)
+
+fun Schemas.parseGuideUpdate(input: JsonElement, current: com.jailbreakchecker.app.data.Guide, now: String): GuideUpdate {
+    val o = input as? JsonObject ?: throw Schemas.InvalidUpdate("input is not an object")
+    fun JsonObject.t(key: String, max: Int = 1200) = ((this[key] as? JsonPrimitive)?.contentOrNull ?: "").trim().take(max)
+    fun strings(key: String, maxItems: Int) = (o[key] as? JsonArray).orEmpty()
+        .mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.trim()?.take(400) }
+        .filter { it.isNotBlank() }
+        .take(maxItems)
+    val steps = (o["steps"] as? JsonArray).orEmpty().mapNotNull { it as? JsonObject }
+        .map { com.jailbreakchecker.app.data.GuideStep(it.t("title", 120), it.t("text", 1500)) }
+        .filter { it.title.isNotBlank() && it.text.isNotBlank() }
+        .take(16)
+    if (steps.size < 2) throw Schemas.InvalidUpdate("guide ${current.id}: too few steps")
+    val links = (o["links"] as? JsonArray).orEmpty().mapNotNull { it as? JsonObject }
+        .map { com.jailbreakchecker.app.data.Source(it.t("title", 120), it.t("url", 500)) }
+        .filter { Regex("^https://\\S+$").matches(it.url) }
+        .take(8)
+    val difficulty = o.t("difficulty").takeIf { it in listOf("facil", "media", "dificil") } ?: current.difficulty
+    return GuideUpdate(
+        changed = (o["changed"] as? JsonPrimitive)?.booleanOrNull == true,
+        changeSummary = o.t("change_summary", 300),
+        guide = current.copy(
+            title = o.t("title", 160).ifBlank { current.title },
+            difficulty = difficulty,
+            time = o.t("time", 60).ifBlank { current.time },
+            summary = o.t("summary", 900).ifBlank { current.summary },
+            requirements = strings("requirements", 14).ifEmpty { current.requirements },
+            steps = steps,
+            warnings = strings("warnings", 10),
+            links = links.ifEmpty { current.links },
+            updatedAt = now,
+        ),
+    )
 }

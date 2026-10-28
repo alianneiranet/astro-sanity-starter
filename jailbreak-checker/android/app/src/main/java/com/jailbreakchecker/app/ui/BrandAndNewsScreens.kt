@@ -1,6 +1,15 @@
 package com.jailbreakchecker.app.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -124,67 +133,96 @@ fun SectionTitle(text: String) {
     )
 }
 
+private val NEWS_FILTERS = listOf("todo" to "Todo", "jailbreak" to "Jailbreak", "emuladores" to "Emuladores", "herramientas" to "Herramientas")
+
+private fun categoryLabel(category: String) = when (category) {
+    "emuladores" -> "Emulador"
+    "herramientas" -> "Herramienta"
+    else -> "Jailbreak"
+}
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NewsList(
     news: List<NewsItem>,
     consoles: List<ConsoleInfo>,
-    hasApiKey: Boolean,
+    searching: Boolean,
     onConsole: (String) -> Unit,
-    onSettings: () -> Unit,
+    onSearchNow: () -> Unit,
 ) {
-    when {
-        news.isEmpty() && !hasApiKey -> Column(Modifier.padding(16.dp)) {
-            SetupBanner(onSettings)
-            EmptyNews("Las noticias las busca la IA desde tu teléfono. Configúrala en Ajustes para empezar.")
+    var filter by rememberSaveable { mutableStateOf("todo") }
+    val names = consoles.associate { it.id to it.shortName }
+    val uri = LocalUriHandler.current
+    val shown = if (filter == "todo") news else news.filter { it.category == filter }
+
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        item {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                NEWS_FILTERS.forEach { (id, label) ->
+                    FilterChip(selected = filter == id, onClick = { filter = id }, label = { Text(label) })
+                }
+            }
         }
-        news.isEmpty() -> EmptyNews("Todavía no hay noticias. Pulsa el botón de actualizar (arriba) o espera a la próxima revisión automática.")
-        else -> {
-            val names = consoles.associate { it.id to it.shortName }
-            val uri = LocalUriHandler.current
-            LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+        if (shown.isEmpty()) {
+            item {
+                EmptyNews(
+                    if (searching) {
+                        "Buscando novedades…"
+                    } else {
+                        "Todavía no hay noticias aquí. Pulsa \"Buscar novedades\": la app lee gratis las webs de la escena (Wololo, GBAtemp, Reddit) y las versiones nuevas de herramientas y emuladores en GitHub."
+                    },
+                )
+                if (!searching) {
+                    Button(onClick = onSearchNow, modifier = Modifier.fillMaxWidth()) { Text("Buscar novedades") }
+                }
+            }
+        }
+        items(shown, key = { it.url.ifBlank { it.title } + it.createdAt }) { item ->
+            val status = Status.parse(item.status)
+            Card(
+                onClick = { if (item.url.isNotBlank()) runCatching { uri.openUri(item.url) } },
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
             ) {
-                items(news, key = { it.id.ifBlank { it.title } }) { item ->
-                    val status = Status.parse(item.status)
-                    Card(
-                        onClick = { if (item.url.isNotBlank()) runCatching { uri.openUri(item.url) } },
-                        shape = RoundedCornerShape(18.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    ) {
-                        Row(Modifier.padding(14.dp)) {
-                            StatusDot(status, Modifier.padding(top = 5.dp), size = 12)
-                            Spacer(Modifier.width(12.dp))
-                            Column(Modifier.weight(1f)) {
-                                Text(item.title, style = MaterialTheme.typography.titleMedium)
-                                Spacer(Modifier.height(4.dp))
-                                Text(item.summary, style = MaterialTheme.typography.bodyMedium)
-                                Spacer(Modifier.height(8.dp))
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    item.consoleIds.take(3).forEach { id ->
-                                        AssistChip(onClick = { onConsole(id) }, label = { Text(names[id] ?: id) })
-                                    }
+                Row(Modifier.padding(14.dp)) {
+                    if (status != Status.UNKNOWN) {
+                        StatusDot(status, Modifier.padding(top = 5.dp), size = 12)
+                        Spacer(Modifier.width(12.dp))
+                    }
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            categoryLabel(item.category).uppercase() + if (item.origin == "ia") " · IA" else "",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        Text(item.title, style = MaterialTheme.typography.titleMedium)
+                        if (item.summary.isNotBlank()) {
+                            Spacer(Modifier.height(4.dp))
+                            Text(item.summary, style = MaterialTheme.typography.bodyMedium, maxLines = 4, overflow = TextOverflow.Ellipsis)
+                        }
+                        if (item.consoleIds.isNotEmpty()) {
+                            Spacer(Modifier.height(6.dp))
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                item.consoleIds.take(3).forEach { id ->
+                                    AssistChip(onClick = { onConsole(id) }, label = { Text(names[id] ?: id) })
                                 }
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        listOf(item.source, item.publishedAt.take(10), relativeTime(item.createdAt))
-                                            .filter { it.isNotBlank() }
-                                            .joinToString(" · "),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.weight(1f),
-                                    )
-                                    if (item.url.isNotBlank()) {
-                                        Icon(
-                                            Icons.AutoMirrored.Outlined.OpenInNew,
-                                            "Abrir",
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        )
-                                    }
-                                }
+                            }
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                listOf(item.source, relativeTime(item.createdAt))
+                                    .filter { it.isNotBlank() }
+                                    .joinToString(" · "),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f),
+                            )
+                            if (item.url.isNotBlank()) {
+                                Icon(Icons.AutoMirrored.Outlined.OpenInNew, "Abrir", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
@@ -198,8 +236,8 @@ fun NewsList(
 private fun EmptyNews(text: String) {
     Column(
         Modifier
-            .fillMaxSize()
-            .padding(32.dp),
+            .fillMaxWidth()
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {

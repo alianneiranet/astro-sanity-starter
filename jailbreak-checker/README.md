@@ -1,10 +1,14 @@
 # Revisor de Jailbreak (app Android con IA)
 
-App Android sencilla que te dice si tu consola se puede hackear según la marca, el modelo y el firmware, y te enseña cómo hacerlo con una guía paso a paso. La IA busca las novedades **desde el propio teléfono**, sin servidor: usa Claude (Anthropic) con búsqueda web y tu propia API key.
+App Android sencilla que te dice si tu consola se puede hackear según la marca, el modelo y el firmware, y te enseña cómo hacerlo con una guía paso a paso. Las noticias de jailbreak, emuladores y herramientas se leen **gratis** de las webs de la escena y de GitHub. Opcionalmente, una IA (Claude, con tu API key) actualiza los estados y las guías **desde el propio teléfono**, sin servidor.
 
 | Inicio | Nintendo | PS5 + tu versión | Switch V2: solo modchip | Guía paso a paso |
 |---|---|---|---|---|
 | ![](docs/home.png) | ![](docs/brand-nintendo.png) | ![](docs/console-ps5.png) | ![](docs/console-switch1-v2.png) | ![](docs/guide-switch-rcm.png) |
+
+| Noticias (jailbreak, emuladores, herramientas) | Ajustes |
+|---|---|
+| ![](docs/news.png) | ![](docs/settings.png) |
 
 ## Cómo funciona
 
@@ -24,26 +28,37 @@ App Android sencilla que te dice si tu consola se puede hackear según la marca,
 | 🟡 Amarillo | En desarrollo o incompleto (exploit parcial, no publicado o pendiente de actualizar). Siempre lleva una explicación. |
 | 🔴 Rojo | No existe ningún método conocido. |
 
-## La IA en el teléfono
+## Noticias gratis + IA opcional
 
-En **Ajustes** (icono del engranaje):
+La app tiene dos capas:
 
-1. Pega tu **API key de Anthropic** (se crea en <https://console.anthropic.com/settings/keys>). Al guardarla, la app comprueba que funciona. Se guarda **cifrada con el Android Keystore** y solo se envía a `api.anthropic.com`.
-2. Elige el **modelo**: Claude Opus 5.5 (por defecto, la más precisa), Sonnet 5.5 o Haiku 5.5 (más baratas).
-3. Elige la **revisión automática**: cada hora (por defecto), cada 3, 6, 12 o 24 horas, o apagada.
+**1. Fuentes gratuitas (0 US$, sin API key).** Al pulsar ⟳ y en cada revisión automática, la app lee directamente:
+- **Jailbreak**: Wololo, GBAtemp, Nintendo Life, r/SwitchHacks, r/ps5homebrew, r/ps4homebrew.
+- **Herramientas**: nuevas versiones en GitHub de Atmosphère, Hekate, GoldHEN, etaHEN, PPPwn_cpp, Luma3DS, BadUpdate, Swiss y OPL.
+- **Emuladores**: EmuCR, r/emulation, los blogs de Dolphin, PCSX2 y RetroArch, y las versiones de shadPS4, Vita3K, Azahar, PPSSPP, DuckStation, Cemu, melonDS, mGBA y xemu.
 
-Qué hace cada revisión (en segundo plano con WorkManager, solo cuando hay internet):
+La lista está en `data/sources.json`. Cada noticia se etiqueta con su consola y su categoría, y la pestaña Noticias tiene filtros: Todo, Jailbreak, Emuladores y Herramientas.
 
-1. **Escaneo de noticias**: Claude hace unas 5 búsquedas web en fuentes de la escena (GBAtemp, Wololo, PSX-Place, los GitHub de los proyectos, ConsoleMods, hacks.guide…). Guarda las noticias nuevas y decide qué consolas han quedado desactualizadas.
-2. **Revisión de consolas**: hasta 2 por ronda. Son las que tienen noticias y las que llevan tiempo sin revisarse (las actuales cada 24 h, las retro cada 30 días). Claude devuelve el estado completo de cada modelo y rango de firmware. También puedes forzarla con **"Revisar esta consola con IA ahora"**.
-3. **Validación**: antes de guardar, la app comprueba que las versiones estén en orden, que cada modelo quede cubierto y que los colores y las guías sean válidos. Si algo no cuadra, se conservan los datos anteriores.
-4. **Avisos**: si una consola cambia o hay noticias nuevas, recibes una notificación.
+**2. IA (opcional, de pago).** Usa Claude con búsqueda web, directamente desde el teléfono y con tu API key. Hace tres cosas:
+- Actualiza el **estado (colores) de cada consola**.
+- Encuentra noticias que no salen en las fuentes.
+- **Actualiza las guías**. El botón "Actualizar todas las guías" (pestaña Guías), o "Actualizar esta guía" dentro de cada una, hace que la IA revise las páginas oficiales y reescriba los pasos, versiones y enlaces. Tarda unos minutos por guía y funciona en segundo plano.
 
-Las llamadas usan razonamiento adaptativo y herramientas con esquema estricto. También activan el *fallback* del servidor, que reintenta con otro modelo si el primero rechaza una búsqueda sobre jailbreaks.
+Para activarla:
+1. En <https://console.anthropic.com> crea una API key y **añade saldo** en Billing (desde 5 US$). Sin saldo la API responde "credit balance is too low" y la app avisa en español.
+2. Pégala en **Ajustes** (⚙). Se guarda cifrada con el Android Keystore y solo se envía a `api.anthropic.com`.
 
-**Coste** (en tu cuenta de Anthropic): una búsqueda cuesta unos 0,23 US$ con Opus 5.5, 0,14 US$ con Sonnet 5.5 y 0,06 US$ con Haiku 5.5. Cada hora con Opus sale por unos 8 US$ al día. La pantalla de Ajustes muestra la estimación para tu configuración y el consumo real de la última búsqueda. Para gastar menos, elige otro modelo o revisa cada más horas.
+Coste aproximado por búsqueda (sobre todo por las búsquedas web, ~0,01 US$ cada una):
 
-Sin API key la app funciona igual con los datos que lleva incluidos (octubre de 2026).
+| Modelo | Por búsqueda | Revisión diaria | Actualizar las 21 guías |
+|---|---|---|---|
+| **Claude Haiku 5.5** (por defecto) | ~0,06 US$ | ~0,6 US$/día | ~1,9 US$ |
+| Claude Sonnet 5.5 | ~0,14 US$ | ~1,6 US$/día | ~3,5 US$ |
+| Claude Opus 5.5 | ~0,23 US$ | ~2,6 US$/día | ~5,5 US$ |
+
+Con 5 US$ y Haiku tienes para unos 8 días de revisión diaria o 2 actualizaciones completas de guías. Puedes elegir la frecuencia (cada 1, 3, 6, 12 o 24 horas, o apagada). Las fuentes gratuitas no cuestan nada con ninguna frecuencia.
+
+Cada respuesta de la IA se valida antes de guardarse (versiones en orden, cada modelo cubierto, solo enlaces https y guías con pasos completos). Si algo no cuadra, se conservan los datos anteriores.
 
 ## Conseguir el APK
 
@@ -64,6 +79,7 @@ jailbreak-checker/
 ├── data/
 │   ├── consoles.json   ← marcas, consolas, modelos y rangos de firmware con su color
 │   ├── guides.json     ← guías paso a paso
+│   ├── sources.json    ← fuentes gratuitas de noticias (RSS/Atom)
 │   └── logos/          ← logos SVG (Wikimedia Commons, ver CREDITS.md)
 ├── android/            ← app (Kotlin + Jetpack Compose + SDK de Anthropic para Java)
 │   └── app/src/main/java/com/jailbreakchecker/app/

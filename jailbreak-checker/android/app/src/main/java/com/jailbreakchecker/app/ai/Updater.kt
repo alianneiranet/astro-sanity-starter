@@ -3,6 +3,8 @@ package com.jailbreakchecker.app.ai
 import com.anthropic.models.beta.messages.BetaOutputConfig
 import com.jailbreakchecker.app.data.ChangeRecord
 import com.jailbreakchecker.app.data.ConsoleInfo
+import com.jailbreakchecker.app.data.FeedFetcher
+import com.jailbreakchecker.app.data.FeedSource
 import com.jailbreakchecker.app.data.Guide
 import com.jailbreakchecker.app.data.LocalState
 import com.jailbreakchecker.app.data.LocalStore
@@ -19,9 +21,27 @@ import java.time.Instant
 class Updater(
     private val store: LocalStore,
     private val bundled: List<ConsoleInfo>,
-    private val guides: List<Guide>,
-    private val runner: Researcher,
+    private val bundledGuides: List<Guide>,
+    private val runner: Researcher?,
 ) {
+    private val guides: List<Guide> get() = Repository.mergeGuides(bundledGuides, store.state.value)
+
+    private fun requireRunner(): Researcher = runner ?: throw IllegalStateException("Sin API key")
+
+    /** Free sources (RSS/Atom), no AI. Returns the items that were not stored yet. */
+    suspend fun fetchFeeds(fetcher: FeedFetcher, sources: List<FeedSource>, now: Instant = Instant.now()): List<NewsItem> {
+        val result = fetcher.fetchAll(sources, now)
+        var added = emptyList<NewsItem>()
+        store.update { s ->
+            val known = s.news.map { key(it) }.toSet()
+            added = result.news.filter { key(it) !in known }.distinctBy { key(it) }
+            s.copy(
+                news = (added + s.news).sortedByDescending { it.createdAt }.take(MAX_NEWS),
+                meta = s.meta.copy(feedsCheckedAt = now.toString(), feedsFailed = result.failed),
+            )
+        }
+        return added
+    }
     data class ScanOutcome(val newNews: List<NewsItem>, val toReview: List<Pair<String, String>>)
 
     private fun consoles(state: LocalState) = Repository.mergeConsoles(bundled, state)
@@ -29,7 +49,7 @@ class Updater(
     suspend fun scan(now: Instant = Instant.now()): ScanOutcome {
         val state = store.state.value
         val consoles = consoles(state)
-        val result = runner.run(
+        val result = requireRunner().run(
             system = Prompts.scanSystem(now.toString().take(10)),
             prompt = Prompts.scanPrompt(consoles, state.news.take(40).map { it.title }),
             tool = Schemas.reportScanTool,
@@ -48,7 +68,7 @@ class Updater(
             val known = s.news.map { key(it) }.toSet()
             added = parsed.news.filter { key(it) !in known }
             s.copy(
-                news = (added + s.news).take(MAX_NEWS),
+                news = (added + s.news).sortedByDescending { it.createdAt }.take(MAX_NEWS),
                 meta = s.meta.copy(
                     lastRunAt = stamp,
                     lastSuccessAt = stamp,
@@ -70,7 +90,7 @@ class Updater(
     /** Returns the change summary when the console changed, null otherwise. Throws on invalid data. */
     suspend fun review(consoleId: String, reason: String, now: Instant = Instant.now()): String? {
         val current = consoles(store.state.value).firstOrNull { it.id == consoleId } ?: return null
-        val result = runner.run(
+        val result = requireRunner().run(
             system = Prompts.reviewSystem(now.toString().take(10)),
             prompt = Prompts.reviewPrompt(current, reason, guides),
             tool = Schemas.submitConsoleTool(guides.map { it.id }),
@@ -95,9 +115,26 @@ class Updater(
         return update.changeSummary.ifBlank { "Información actualizada" }.takeIf { update.changed }
     }
 
+    /** Rewrites one guide with current official information. Returns the change summary, or null. */
+    suspend fun updateGuide(guideId: String, now: Instant = Instant.now()): String? {
+        val current = guides.firstOrNull { it.id == guideId } ?: return null
+        val result = requireRunner().run(
+            system = Prompts.guideSystem(now.toString().take(10)),
+            prompt = Prompts.guidePrompt(current),
+            tool = Schemas.submitGuideTool,
+            effort = BetaOutputConfig.Effort.HIGH,
+            maxSearches = 8,
+        )
+        val input = result.input ?: throw Schemas.InvalidUpdate("sin respuesta para la guía $guideId")
+        val update = Schemas.parseGuideUpdate(input, current, now.toString())
+        // Even "no changes" refreshes the date, so the user sees the guide was checked.
+        store.update { s -> s.copy(guides = s.guides + (guideId to update.guide)) }
+        return update.changeSummary.ifBlank { "Guía revisada" }.takeIf { update.changed }
+    }
+
     companion object {
         const val MAX_REVIEWS_PER_RUN = 2
-        private const val MAX_NEWS = 100
+        private const val MAX_NEWS = 150
         private const val MAX_HISTORY = 50
 
         private fun key(n: NewsItem) = n.url.ifBlank { n.title }.lowercase()

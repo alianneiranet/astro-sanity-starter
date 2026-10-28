@@ -64,7 +64,8 @@ class UpdaterTest {
     private fun toolUse(name: String, input: String) =
         message("tool_use", """[{"type":"tool_use","id":"toolu_1","name":"$name","input":$input}]""")
 
-    private fun updater() = Updater(store, catalog.consoles, guides, ClaudeRunner("test-key", "claude-opus-5-5", server.url("/").toString()))
+    private fun updater(model: String = "claude-opus-5-5") =
+        Updater(store, catalog.consoles, guides, ClaudeRunner("test-key", model, server.url("/").toString()))
 
     private val switchUpdate = """{
       "changed": true, "change_summary": "Atmosphère soporta ya la 23.1.0",
@@ -185,5 +186,56 @@ class UpdaterTest {
         assertTrue("ps5" !in due)
         // never-checked consoles with a 24 h interval come before retro ones checked monthly
         assertTrue(due.indexOf("ps4") < due.indexOf("nes"))
+    }
+
+    @Test
+    fun haikuUsesBasicWebSearchAndNoFallback(): Unit = runBlocking {
+        server.enqueue(toolUse(Schemas.REPORT_SCAN, """{"news":[{"title":"shadPS4 0.12","summary":"Nueva versión del emulador.","category":"emuladores","console_ids":[],"status":"green","url":"https://github.com/shadps4-emu/shadPS4/releases","source":"GitHub","published_date":"2026-10-29"}],"consoles_to_review":[]}"""))
+        val outcome = updater("claude-haiku-5-5").scan(Instant.parse("2026-10-29T10:00:00Z"))
+        // emulator news may be general (no console), and is kept with its category
+        assertEquals("emuladores", outcome.newNews.single().category)
+        val request = server.takeRequest()
+        val body = Json.parseToJsonElement(request.body.readUtf8()).jsonObject
+        assertEquals("web_search_20250305", body["tools"]!!.jsonArray[0].jsonObject["type"]!!.jsonPrimitive.content)
+        assertEquals(null, body["fallbacks"])
+        assertTrue(request.getHeader("anthropic-beta")?.contains("server-side-fallback") != true)
+        assertEquals("claude-haiku-5-5", body["model"]!!.jsonPrimitive.content)
+    }
+
+    @Test
+    fun guideUpdateIsValidatedAndStored(): Unit = runBlocking {
+        server.enqueue(
+            toolUse(
+                Schemas.SUBMIT_GUIDE,
+                """{"changed":true,"change_summary":"Hekate 6.4 y Atmosphère 1.12.2","title":"Switch V1 sin parche: Atmosphère con RCM",
+                "difficulty":"media","time":"1 hora","summary":"Resumen.","requirements":["Jig RCM","microSD 64 GB"],
+                "steps":[{"title":"Prepara la SD","text":"Copia Hekate 6.4."},{"title":"Entra en RCM","text":"Vol+ y Power."},{"title":"Envía el payload","text":"TegraRcmGUI."}],
+                "warnings":["Riesgo de baneo."],
+                "links":[{"title":"Atmosphère","url":"https://github.com/Atmosphere-NX/Atmosphere/releases"},{"title":"pirata","url":"http://example.com/roms"}]}""",
+            ),
+        )
+        val change = updater("claude-haiku-5-5").updateGuide("switch-rcm", Instant.parse("2026-10-29T10:00:00Z"))
+        assertEquals("Hekate 6.4 y Atmosphère 1.12.2", change)
+        val stored = Repository.mergeGuides(guides, store.state.value).first { it.id == "switch-rcm" }
+        assertEquals(3, stored.steps.size)
+        assertEquals("Copia Hekate 6.4.", stored.steps.first().text)
+        // only https links survive
+        assertEquals(listOf("https://github.com/Atmosphere-NX/Atmosphere/releases"), stored.links.map { it.url })
+        assertEquals("2026-10-29T10:00:00Z", stored.updatedAt)
+
+        // a guide with fewer than 2 steps is rejected and the old one kept
+        server.enqueue(toolUse(Schemas.SUBMIT_GUIDE, """{"changed":true,"change_summary":"x","title":"t","difficulty":"facil","time":"","summary":"","requirements":[],"steps":[{"title":"a","text":"b"}],"warnings":[],"links":[]}"""))
+        assertThrows(Schemas.InvalidUpdate::class.java) { runBlocking { updater("claude-haiku-5-5").updateGuide("wii-letterbomb") } }
+        assertTrue("wii-letterbomb" !in store.state.value.guides)
+    }
+
+    @Test
+    fun noCreditErrorIsExplainedInSpanish() {
+        server.enqueue(
+            MockResponse().setResponseCode(400).setHeader("content-type", "application/json")
+                .setBody("""{"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."}}"""),
+        )
+        val error = runCatching { runBlocking { updater("claude-haiku-5-5").scan() } }.exceptionOrNull()!!
+        assertTrue(ClaudeRunner.explain(error).startsWith("Tu cuenta de Anthropic no tiene saldo"))
     }
 }

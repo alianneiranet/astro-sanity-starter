@@ -121,6 +121,10 @@ data class NewsItem(
     val source: String = "",
     val publishedAt: String = "",
     val createdAt: String = "",
+    /** jailbreak | emuladores | herramientas */
+    val category: String = "jailbreak",
+    /** "ia" (found by the AI) or "feed" (free RSS/Atom source) */
+    val origin: String = "ia",
 )
 
 @Serializable
@@ -132,6 +136,9 @@ data class UpdaterMeta(
     val lastInputTokens: Long = 0,
     val lastOutputTokens: Long = 0,
     val lastSearches: Long = 0,
+    /** Free RSS/Atom sources: last time they were read and which ones failed. */
+    val feedsCheckedAt: String = "",
+    val feedsFailed: List<String> = emptyList(),
 )
 
 /** One AI change to a console, kept for the "historial" list. */
@@ -161,6 +168,8 @@ data class Guide(
     val steps: List<GuideStep> = emptyList(),
     val warnings: List<String> = emptyList(),
     val links: List<Source> = emptyList(),
+    /** Set when the AI rewrote the guide (ISO-8601); empty for the bundled version. */
+    val updatedAt: String = "",
 )
 
 @Serializable

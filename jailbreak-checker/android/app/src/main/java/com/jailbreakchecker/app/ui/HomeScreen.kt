@@ -32,7 +32,10 @@ import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SportsEsports
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -77,6 +80,8 @@ fun HomeScreen(
     news: List<NewsItem>,
     meta: UpdaterMeta,
     guides: List<Guide>,
+    updatingGuides: Set<String>,
+    onUpdateAllGuides: () -> Unit,
     hasApiKey: Boolean,
     searching: Boolean,
     onBrand: (String) -> Unit,
@@ -103,7 +108,7 @@ fun HomeScreen(
                     if (searching) {
                         CircularProgressIndicator(Modifier.padding(12.dp).size(22.dp), strokeWidth = 2.dp)
                     } else {
-                        IconButton(onClick = if (hasApiKey) onSearchNow else onSettings) {
+                        IconButton(onClick = onSearchNow) {
                             Icon(Icons.Outlined.Refresh, "Buscar novedades ahora")
                         }
                     }
@@ -137,18 +142,22 @@ fun HomeScreen(
         Box(Modifier.padding(padding)) {
             when (tab) {
                 0 -> BrandsTab(brands, consoles, hasApiKey, onBrand, onConsole, onSettings)
-                1 -> NewsList(news, consoles, hasApiKey, onConsole, onSettings)
-                else -> GuidesList(guides, consoles, onGuide)
+                1 -> NewsList(news, consoles, searching, onConsole, onSearchNow)
+                else -> GuidesList(guides, consoles, hasApiKey, updatingGuides, onGuide, onUpdateAllGuides, onSettings)
             }
         }
     }
 }
 
 private fun updateLine(meta: UpdaterMeta, hasApiKey: Boolean, searching: Boolean): String {
-    if (searching) return "La IA está buscando novedades…"
-    if (!hasApiKey) return "Datos de octubre de 2026 · IA sin configurar"
-    val last = meta.lastSuccessAt.takeIf { it.isNotBlank() } ?: return "La IA aún no ha buscado novedades"
-    return "La IA revisó las noticias ${relativeTime(last)}"
+    if (searching) return "Buscando novedades…"
+    val ai = meta.lastSuccessAt.takeIf { hasApiKey && it.isNotBlank() }
+    val feeds = meta.feedsCheckedAt.takeIf { it.isNotBlank() }
+    return when {
+        ai != null -> "La IA revisó todo ${relativeTime(ai)}"
+        feeds != null -> "Noticias actualizadas ${relativeTime(feeds)}"
+        else -> "Pulsa ⟳ para buscar novedades"
+    }
 }
 
 @Composable
@@ -378,7 +387,15 @@ fun Disclaimer(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun GuidesList(guides: List<Guide>, consoles: List<ConsoleInfo>, onGuide: (String) -> Unit) {
+private fun GuidesList(
+    guides: List<Guide>,
+    consoles: List<ConsoleInfo>,
+    hasApiKey: Boolean,
+    updating: Set<String>,
+    onGuide: (String) -> Unit,
+    onUpdateAll: () -> Unit,
+    onSettings: () -> Unit,
+) {
     val names = consoles.associate { it.id to it.shortName }
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
@@ -392,6 +409,45 @@ private fun GuidesList(guides: List<Guide>, consoles: List<ConsoleInfo>, onGuide
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        item {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+            ) {
+                Column(Modifier.padding(14.dp)) {
+                    if (updating.isNotEmpty()) {
+                        val done = guides.size - updating.size
+                        Text("Actualizando guías con IA: $done de ${guides.size}…", style = MaterialTheme.typography.titleMedium)
+                        Spacer(Modifier.height(8.dp))
+                        LinearProgressIndicator(progress = { done.toFloat() / guides.size.coerceAtLeast(1) }, modifier = Modifier.fillMaxWidth())
+                        Text(
+                            "La IA revisa cada guía en las páginas oficiales (pasos, versiones y enlaces). Tarda unos minutos por guía; puedes cerrar la app.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    } else {
+                        Text("Actualizar las guías", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "La IA revisa cada guía en las fuentes oficiales y la reescribe con los pasos, versiones y enlaces actuales. " +
+                                "Tarda un rato (unos minutos por guía) y cuesta ~${guides.size * 9 / 100.0} US$ con Haiku.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(vertical = 6.dp),
+                        )
+                        if (hasApiKey) {
+                            Button(onClick = onUpdateAll, modifier = Modifier.fillMaxWidth()) {
+                                Icon(Icons.Outlined.Refresh, null)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Actualizar todas las guías")
+                            }
+                        } else {
+                            OutlinedButton(onClick = onSettings, modifier = Modifier.fillMaxWidth()) { Text("Configurar la IA para actualizar guías") }
+                        }
+                    }
+                }
+            }
+        }
         items(guides, key = { it.id }) { guide ->
             Card(
                 onClick = { onGuide(guide.id) },
@@ -399,10 +455,14 @@ private fun GuidesList(guides: List<Guide>, consoles: List<ConsoleInfo>, onGuide
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
             ) {
                 Column(Modifier.padding(14.dp)) {
-                    Text(guide.title, style = MaterialTheme.typography.titleMedium)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(guide.title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                        if (guide.id in updating) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    }
                     Text(
                         guide.consoleIds.mapNotNull { names[it] }.joinToString(" · ") +
-                            if (guide.time.isNotBlank()) " · ${guide.time}" else "",
+                            (if (guide.time.isNotBlank()) " · ${guide.time}" else "") +
+                            (if (guide.updatedAt.isNotBlank()) " · revisada ${relativeTime(guide.updatedAt)}" else ""),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

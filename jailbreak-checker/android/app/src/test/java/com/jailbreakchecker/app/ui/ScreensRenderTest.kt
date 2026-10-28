@@ -66,7 +66,7 @@ class ScreensRenderTest {
 
     @Test
     fun home() {
-        show { HomeScreen(catalog.brands, catalog.consoles, emptyList(), UpdaterMeta(), guides.values.toList(), false, false, {}, {}, {}, {}, {}) }
+        show { HomeScreen(catalog.brands, catalog.consoles, emptyList(), UpdaterMeta(), guides.values.toList(), emptySet(), {}, false, false, {}, {}, {}, {}, {}) }
         compose.onNodeWithText("Activa la búsqueda con IA").assertExists()
         snapshot("home")
     }
@@ -113,9 +113,25 @@ class ScreensRenderTest {
 
     @Test
     fun guide() {
-        show { GuideScreen(guides["switch-rcm"], {}) }
+        show { GuideScreen(guides["switch-rcm"], true, false, {}, {}, {}) }
         compose.onNodeWithText("Qué necesitas").assertExists()
         snapshot("guide-switch-rcm")
+    }
+
+    @Test
+    fun newsWithFilters() {
+        val now = java.time.Instant.parse("2026-10-29T10:00:00Z").toString()
+        val news = listOf(
+            com.jailbreakchecker.app.data.NewsItem(title = "Atmosphère 1.12.2", summary = "Soporte para 23.1.0.", consoleIds = listOf("switch1"), url = "https://github.com/Atmosphere-NX/Atmosphere/releases", source = "Atmosphère (GitHub)", createdAt = now, category = "herramientas", origin = "feed"),
+            com.jailbreakchecker.app.data.NewsItem(title = "shadPS4 v0.12 mejora el rendimiento", summary = "Nueva versión del emulador de PS4.", consoleIds = listOf("ps4"), url = "https://github.com/shadps4-emu/shadPS4/releases", source = "shadPS4 (GitHub)", createdAt = now, category = "emuladores", origin = "feed"),
+            com.jailbreakchecker.app.data.NewsItem(title = "Exploit de kernel para PS5 14.00", summary = "Demostración privada, sin publicar.", consoleIds = listOf("ps5"), status = "yellow", url = "https://example.com", source = "Wololo", createdAt = now, category = "jailbreak", origin = "ia"),
+        )
+        show { NewsList(news, catalog.consoles, false, {}, {}) }
+        compose.onNodeWithText("Emuladores").performClick()
+        compose.onNodeWithText("shadPS4 v0.12 mejora el rendimiento").assertExists()
+        compose.onNodeWithText("Atmosphère 1.12.2").assertDoesNotExist()
+        compose.onNodeWithText("Todo").performClick()
+        snapshot("news")
     }
 
     @Test

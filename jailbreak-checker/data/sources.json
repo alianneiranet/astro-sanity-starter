@@ -1,0 +1,36 @@
+{
+  "comment": "Free news sources the app reads directly (RSS / Atom), no AI and no API key. category: jailbreak | emuladores | herramientas. filter=true keeps only items that look like hacking/homebrew/emulation news.",
+  "sources": [
+    { "id": "wololo", "name": "Wololo", "url": "https://wololo.net/feed/", "category": "jailbreak", "consoleIds": [], "filter": false },
+    { "id": "gbatemp", "name": "GBAtemp", "url": "https://gbatemp.net/forums/-/index.rss", "category": "jailbreak", "consoleIds": [], "filter": true },
+    { "id": "nintendolife", "name": "Nintendo Life", "url": "https://www.nintendolife.com/feeds/latest", "category": "jailbreak", "consoleIds": [], "filter": true },
+    { "id": "r-switchhacks", "name": "r/SwitchHacks", "url": "https://www.reddit.com/r/SwitchHacks/new/.rss", "category": "jailbreak", "consoleIds": ["switch1"], "filter": true },
+    { "id": "r-ps5homebrew", "name": "r/ps5homebrew", "url": "https://www.reddit.com/r/ps5homebrew/new/.rss", "category": "jailbreak", "consoleIds": ["ps5"], "filter": true },
+    { "id": "r-ps4homebrew", "name": "r/ps4homebrew", "url": "https://www.reddit.com/r/ps4homebrew/new/.rss", "category": "jailbreak", "consoleIds": ["ps4"], "filter": true },
+    { "id": "r-emulation", "name": "r/emulation", "url": "https://www.reddit.com/r/emulation/new/.rss", "category": "emuladores", "consoleIds": [], "filter": true },
+    { "id": "emucr", "name": "EmuCR", "url": "https://www.emucr.com/feeds/posts/default", "category": "emuladores", "consoleIds": [], "filter": false },
+    { "id": "dolphin", "name": "Dolphin (blog)", "url": "https://dolphin-emu.org/blog/feeds/", "category": "emuladores", "consoleIds": ["gamecube", "wii"], "filter": false },
+    { "id": "pcsx2", "name": "PCSX2 (blog)", "url": "https://pcsx2.net/blog/rss.xml", "category": "emuladores", "consoleIds": ["ps2"], "filter": false },
+    { "id": "libretro", "name": "RetroArch / libretro", "url": "https://www.libretro.com/index.php/feed/", "category": "emuladores", "consoleIds": [], "filter": false },
+
+    { "id": "gh-atmosphere", "name": "Atmosphère (GitHub)", "url": "https://github.com/Atmosphere-NX/Atmosphere/releases.atom", "category": "herramientas", "consoleIds": ["switch1"], "filter": false },
+    { "id": "gh-hekate", "name": "Hekate (GitHub)", "url": "https://github.com/CTCaer/hekate/releases.atom", "category": "herramientas", "consoleIds": ["switch1"], "filter": false },
+    { "id": "gh-goldhen", "name": "GoldHEN (GitHub)", "url": "https://github.com/GoldHEN/GoldHEN/releases.atom", "category": "herramientas", "consoleIds": ["ps4"], "filter": false },
+    { "id": "gh-etahen", "name": "etaHEN (GitHub)", "url": "https://github.com/etaHEN/etaHEN/releases.atom", "category": "herramientas", "consoleIds": ["ps5"], "filter": false },
+    { "id": "gh-pppwn", "name": "PPPwn_cpp (GitHub)", "url": "https://github.com/xfangfang/PPPwn_cpp/releases.atom", "category": "herramientas", "consoleIds": ["ps4"], "filter": false },
+    { "id": "gh-luma", "name": "Luma3DS (GitHub)", "url": "https://github.com/LumaTeam/Luma3DS/releases.atom", "category": "herramientas", "consoleIds": ["n3ds"], "filter": false },
+    { "id": "gh-badupdate", "name": "BadUpdate (GitHub)", "url": "https://github.com/grimdoomer/Xbox360BadUpdate/releases.atom", "category": "herramientas", "consoleIds": ["x360"], "filter": false },
+    { "id": "gh-swiss", "name": "Swiss (GitHub)", "url": "https://github.com/emukidid/swiss-gc/releases.atom", "category": "herramientas", "consoleIds": ["gamecube"], "filter": false },
+    { "id": "gh-opl", "name": "Open PS2 Loader (GitHub)", "url": "https://github.com/ps2homebrew/Open-PS2-Loader/releases.atom", "category": "herramientas", "consoleIds": ["ps2"], "filter": false },
+
+    { "id": "gh-shadps4", "name": "shadPS4 (GitHub)", "url": "https://github.com/shadps4-emu/shadPS4/releases.atom", "category": "emuladores", "consoleIds": ["ps4"], "filter": false },
+    { "id": "gh-vita3k", "name": "Vita3K (GitHub)", "url": "https://github.com/Vita3K/Vita3K/releases.atom", "category": "emuladores", "consoleIds": ["vita"], "filter": false },
+    { "id": "gh-azahar", "name": "Azahar 3DS (GitHub)", "url": "https://github.com/azahar-emu/azahar/releases.atom", "category": "emuladores", "consoleIds": ["n3ds"], "filter": false },
+    { "id": "gh-ppsspp", "name": "PPSSPP (GitHub)", "url": "https://github.com/hrydgard/ppsspp/releases.atom", "category": "emuladores", "consoleIds": ["psp"], "filter": false },
+    { "id": "gh-duckstation", "name": "DuckStation (GitHub)", "url": "https://github.com/stenzek/duckstation/releases.atom", "category": "emuladores", "consoleIds": ["ps1"], "filter": false },
+    { "id": "gh-cemu", "name": "Cemu (GitHub)", "url": "https://github.com/cemu-project/Cemu/releases.atom", "category": "emuladores", "consoleIds": ["wiiu"], "filter": false },
+    { "id": "gh-melonds", "name": "melonDS (GitHub)", "url": "https://github.com/melonDS-emu/melonDS/releases.atom", "category": "emuladores", "consoleIds": ["nds"], "filter": false },
+    { "id": "gh-mgba", "name": "mGBA (GitHub)", "url": "https://github.com/mgba-emu/mgba/releases.atom", "category": "emuladores", "consoleIds": ["gba", "gbc"], "filter": false },
+    { "id": "gh-xemu", "name": "xemu (GitHub)", "url": "https://github.com/xemu-project/xemu/releases.atom", "category": "emuladores", "consoleIds": ["xbox"], "filter": false }
+  ]
+}

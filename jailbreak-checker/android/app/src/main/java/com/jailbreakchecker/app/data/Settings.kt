@@ -23,11 +23,12 @@ data class AppSettings(
     val hasApiKey: Boolean get() = apiKey.isNotBlank()
 
     companion object {
-        const val DEFAULT_MODEL = "claude-opus-5-5"
+        /** The cheapest model: the user asked to keep costs down. */
+        const val DEFAULT_MODEL = "claude-haiku-5-5"
         val MODELS = listOf(
-            "claude-opus-5-5" to "Claude Opus 5.5 (la más precisa)",
-            "claude-sonnet-5-5" to "Claude Sonnet 5.5 (≈ mitad de coste)",
-            "claude-haiku-5-5" to "Claude Haiku 5.5 (la más barata)",
+            "claude-haiku-5-5" to "Claude Haiku 5.5 · la más barata (recomendada)",
+            "claude-sonnet-5-5" to "Claude Sonnet 5.5 · más precisa",
+            "claude-opus-5-5" to "Claude Opus 5.5 · la más precisa",
         )
         val INTERVALS = listOf(1, 3, 6, 12, 24, 0)
     }
@@ -39,6 +40,15 @@ class SettingsStore private constructor(context: Context) {
     private val prefs = context.applicationContext.getSharedPreferences("settings", Context.MODE_PRIVATE)
     private val _settings = MutableStateFlow(load())
     val settings: StateFlow<AppSettings> = _settings.asStateFlow()
+
+    init {
+        // v3: switch the old Opus default to Haiku, which costs ~40× less.
+        if (prefs.getInt(KEY_VERSION, 0) < 3) {
+            if (prefs.getString(KEY_MODEL, null) == "claude-opus-5-5") prefs.edit().putString(KEY_MODEL, AppSettings.DEFAULT_MODEL).apply()
+            prefs.edit().putInt(KEY_VERSION, 3).apply()
+            _settings.value = load()
+        }
+    }
 
     private fun load() = AppSettings(
         apiKey = prefs.getString(KEY_API, null)?.let { runCatching { KeyCrypto.decrypt(it) }.getOrNull() }.orEmpty(),
@@ -62,6 +72,7 @@ class SettingsStore private constructor(context: Context) {
         private const val KEY_MODEL = "model"
         private const val KEY_INTERVAL = "interval_hours"
         private const val KEY_NOTIFY = "notifications"
+        private const val KEY_VERSION = "settings_version"
 
         @Volatile
         private var instance: SettingsStore? = null

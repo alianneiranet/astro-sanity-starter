@@ -32,7 +32,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val settingsStore = SettingsStore.get(application)
 
     val brands = repository.bundled.brands.sortedBy { it.order }
-    val guides: List<Guide> = repository.guides
+    val guides: StateFlow<List<Guide>> = repository.guides()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), repository.bundledGuides)
     val logoIds: Set<String> = repository.logoIds
 
     val settings: StateFlow<AppSettings> = settingsStore.settings
@@ -49,11 +50,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val history: StateFlow<List<ChangeRecord>> = repository.history()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    /** Ids being worked on right now ("scan" for the news scan, or console ids). */
+    /**
+     * What is being worked on right now: "scan" for the news search, a console id for a review,
+     * or "guide:<id>" for a guide update (queued or running).
+     */
     val running: StateFlow<Set<String>> = workInfos()
         .map { infos ->
-            infos.filter { it.state == WorkInfo.State.RUNNING || (it.state == WorkInfo.State.ENQUEUED && it.tags.any { t -> t.startsWith("review-") || t == "manual" }) }
-                .map { info -> info.tags.firstOrNull { it.startsWith("review-") }?.removePrefix("review-") ?: "scan" }
+            infos.filter {
+                it.state == WorkInfo.State.RUNNING ||
+                    (it.state == WorkInfo.State.ENQUEUED && it.tags.any { t -> t.startsWith("review-") || t.startsWith("guide-") || t == "manual" })
+            }
+                .map { info ->
+                    info.tags.firstOrNull { it.startsWith("review-") }?.removePrefix("review-")
+                        ?: info.tags.firstOrNull { it.startsWith("guide-") }?.let { "guide:" + it.removePrefix("guide-") }
+                        ?: "scan"
+                }
                 .toSet()
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
@@ -65,6 +76,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun runNow() = AiWorker.runNow(getApplication())
 
     fun reviewNow(consoleId: String) = AiWorker.reviewNow(getApplication(), consoleId)
+
+    fun updateGuides(ids: List<String>) = AiWorker.updateGuides(getApplication(), ids)
+
+    fun updateAllGuides() = updateGuides(guides.value.map { it.id })
 
     fun saveSettings(settings: AppSettings) {
         settingsStore.save(settings)

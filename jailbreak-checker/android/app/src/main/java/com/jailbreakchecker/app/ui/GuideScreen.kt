@@ -11,15 +11,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -55,7 +59,14 @@ private val Guide.difficultyLabel: String
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GuideScreen(guide: Guide?, onBack: () -> Unit) {
+fun GuideScreen(
+    guide: Guide?,
+    hasApiKey: Boolean,
+    updating: Boolean,
+    onUpdate: () -> Unit,
+    onSettings: () -> Unit,
+    onBack: () -> Unit,
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -90,6 +101,27 @@ fun GuideScreen(guide: Guide?, onBack: () -> Unit) {
                 }
                 Spacer(Modifier.height(10.dp))
                 Text(guide.summary, style = MaterialTheme.typography.bodyLarge)
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    if (guide.updatedAt.isNotBlank()) "Revisada por IA ${relativeTime(guide.updatedAt)} en las fuentes oficiales." else "Versión incluida en la app (octubre de 2026).",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                OutlinedButton(
+                    onClick = if (hasApiKey) onUpdate else onSettings,
+                    enabled = !updating,
+                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                ) {
+                    if (updating) {
+                        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(10.dp))
+                        Text("Actualizando con IA… (unos minutos)")
+                    } else {
+                        Icon(Icons.Outlined.Refresh, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(if (hasApiKey) "Actualizar esta guía con IA" else "Configura la IA para actualizar")
+                    }
+                }
             }
             if (guide.requirements.isNotEmpty()) {
                 item {

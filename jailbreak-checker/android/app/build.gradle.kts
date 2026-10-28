@@ -13,8 +13,8 @@ android {
         applicationId = "com.jailbreakchecker.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "2.0.0"
+        versionCode = 3
+        versionName = "3.0.0"
     }
 
     signingConfigs {
@@ -95,6 +95,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 
     implementation("androidx.work:work-runtime-ktx:2.10.5")
+    // Free RSS/Atom news sources (same OkHttp the Anthropic SDK uses)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // Claude API (runs on the phone with the user's own API key)
     implementation("com.anthropic:anthropic-java:3.3.0")
