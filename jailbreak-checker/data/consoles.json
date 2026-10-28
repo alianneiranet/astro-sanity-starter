@@ -1,0 +1,1219 @@
+{
+  "seedVersion": 1,
+  "generatedAt": "2026-10-28T00:00:00Z",
+  "brands": [
+    {
+      "id": "sony",
+      "name": "PlayStation",
+      "company": "Sony",
+      "color": "#0070D1",
+      "order": 1,
+      "description": "Desde la PS1 hasta la PS5."
+    },
+    {
+      "id": "nintendo",
+      "name": "Nintendo",
+      "company": "Nintendo",
+      "color": "#E60012",
+      "order": 2,
+      "description": "Sobremesa y portátiles, desde la NES hasta la Switch 2."
+    },
+    {
+      "id": "microsoft",
+      "name": "Xbox",
+      "company": "Microsoft",
+      "color": "#107C10",
+      "order": 3,
+      "description": "Desde la Xbox original hasta la Xbox Series X|S."
+    },
+    {
+      "id": "sega",
+      "name": "SEGA",
+      "company": "Sega",
+      "color": "#1F5FBF",
+      "order": 4,
+      "description": "Clásicas de SEGA: Master System, Mega Drive, Saturn, Dreamcast…"
+    },
+    {
+      "id": "atari",
+      "name": "Atari",
+      "company": "Atari",
+      "color": "#B5121B",
+      "order": 5,
+      "description": "Las pioneras: Atari 2600 y Jaguar."
+    }
+  ],
+  "consoles": [
+    {
+      "id": "ps5",
+      "brandId": "sony",
+      "name": "PlayStation 5",
+      "shortName": "PS5",
+      "year": 2020,
+      "formFactor": "home",
+      "legacy": false,
+      "mode": "firmware",
+      "latestFirmware": "14.20",
+      "checkEveryHours": 24,
+      "summary": {
+        "status": "green",
+        "text": "Jailbreak hasta la 13.60 (incluye Slim y Pro)"
+      },
+      "versionHint": "Ajustes > Sistema > Software del sistema > Información de la consola",
+      "variants": [],
+      "firmwares": [
+        {
+          "id": "ps5-100-650",
+          "label": "1.00 – 6.50",
+          "variant": "",
+          "min": "1.00",
+          "max": "6.50",
+          "status": "green",
+          "title": "Jailbreak disponible",
+          "explanation": "Firmwares antiguos con varios exploits públicos (WebKit + kernel, BD-JB/UMTX y cargadores Lua por partida guardada). Permiten cargar etaHEN para homebrew y copias de seguridad. El jailbreak no es permanente: hay que relanzarlo en cada arranque.",
+          "method": "UMTX / BD-JB / Lua loader + etaHEN o kstuff"
+        },
+        {
+          "id": "ps5-700-1360",
+          "label": "7.00 – 13.60",
+          "variant": "",
+          "min": "7.00",
+          "max": "13.60",
+          "status": "green",
+          "title": "Jailbreak disponible (Relapse)",
+          "explanation": "El exploit Relapse (publicado el 29 de septiembre de 2026) combina un fallo del navegador WebKit con un exploit de kernel. Funciona en PS5 original, Slim y Pro. Permite cargar etaHEN, kstuff y ShadowMount. Es temporal (se pierde al reiniciar) y sin acceso a PSN.",
+          "method": "Relapse (navegador) + etaHEN / kstuff"
+        },
+        {
+          "id": "ps5-1400-1410",
+          "label": "14.00 – 14.10",
+          "variant": "",
+          "min": "14.00",
+          "max": "14.10",
+          "status": "yellow",
+          "title": "En desarrollo",
+          "explanation": "Sony cerró Relapse con la 14.00. Hay reportes de un exploit de kernel en 14.10 mostrado en privado, pero no hay nada público ni verificado. Si estás en estas versiones, no actualices y espera noticias.",
+          "method": "Sin método público todavía"
+        },
+        {
+          "id": "ps5-1420-plus",
+          "label": "14.20 o superior",
+          "variant": "",
+          "min": "14.20",
+          "max": "",
+          "status": "red",
+          "title": "Sin jailbreak",
+          "explanation": "No existe ningún exploit conocido para el firmware más reciente. Además, la 14.10+ exige un firmware mínimo para entrar a PSN.",
+          "method": "—"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Relapse-Exploit (GitHub)",
+          "url": "https://github.com/ntfargo/Relapse-Exploit"
+        },
+        {
+          "title": "GBAtemp: Relapse 7.00-13.60",
+          "url": "https://gbatemp.net/threads/relapse-ps5-kernel-exploit-brings-homebrew-to-firmware-7-00-13-60.684829/"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "ps4",
+      "brandId": "sony",
+      "name": "PlayStation 4",
+      "shortName": "PS4",
+      "year": 2013,
+      "formFactor": "home",
+      "legacy": false,
+      "mode": "firmware",
+      "latestFirmware": "14.00",
+      "checkEveryHours": 24,
+      "summary": {
+        "status": "green",
+        "text": "Jailbreak hasta la 13.52 con GoldHEN"
+      },
+      "versionHint": "Ajustes > Sistema > Información del sistema",
+      "variants": [],
+      "firmwares": [
+        {
+          "id": "ps4-100-474",
+          "label": "1.00 – 4.74",
+          "variant": "",
+          "min": "1.00",
+          "max": "4.74",
+          "status": "green",
+          "title": "Jailbreak disponible (antiguo)",
+          "explanation": "Hay exploits antiguos (1.76, 4.05, 4.55), pero GoldHEN no los soporta. Lo recomendado es actualizar manualmente por USB a 5.05, 9.00 u otra versión compatible con GoldHEN.",
+          "method": "Actualizar a una versión compatible + GoldHEN"
+        },
+        {
+          "id": "ps4-500-900",
+          "label": "5.00 – 9.00",
+          "variant": "",
+          "min": "5.00",
+          "max": "9.00",
+          "status": "green",
+          "title": "Jailbreak disponible",
+          "explanation": "Rango clásico (5.05, 6.72, 7.02, 7.55, 9.00). Se hace desde el navegador o con PPPwn por cable Ethernet. GoldHEN da homebrew, copias de seguridad, trucos y FTP.",
+          "method": "Exploit de navegador o PPPwn + GoldHEN"
+        },
+        {
+          "id": "ps4-903-1100",
+          "label": "9.03 – 11.00",
+          "variant": "",
+          "min": "9.03",
+          "max": "11.00",
+          "status": "green",
+          "title": "Jailbreak disponible (PPPwn)",
+          "explanation": "PPPwn aprovecha un fallo en PPPoE: necesitas un PC, una Raspberry Pi o un router compatible conectado por cable. Hay que repetirlo en cada arranque.",
+          "method": "PPPwn + GoldHEN"
+        },
+        {
+          "id": "ps4-1102-1202",
+          "label": "11.02 – 12.02",
+          "variant": "",
+          "min": "11.02",
+          "max": "12.02",
+          "status": "green",
+          "title": "Jailbreak disponible",
+          "explanation": "Funciona con el exploit de kernel Lapse (vía BD-JB o navegador) y GoldHEN 2.4b18 o posterior.",
+          "method": "Lapse + GoldHEN"
+        },
+        {
+          "id": "ps4-1250-1352",
+          "label": "12.50 – 13.52",
+          "variant": "",
+          "min": "12.50",
+          "max": "13.52",
+          "status": "green",
+          "title": "Jailbreak disponible (2026)",
+          "explanation": "En septiembre de 2026 salió un método por navegador que carga GoldHEN 2.4b18.12 hasta la 13.52. Es temporal: hay que volver a cargarlo después de cada reinicio.",
+          "method": "Exploit de navegador + GoldHEN 2.4b18.12"
+        },
+        {
+          "id": "ps4-1400-plus",
+          "label": "14.00 o superior",
+          "variant": "",
+          "min": "14.00",
+          "max": "",
+          "status": "red",
+          "title": "Sin jailbreak",
+          "explanation": "La 14.00 (16 de septiembre de 2026) cerró los exploits públicos. No actualices si quieres hacer jailbreak.",
+          "method": "—"
+        }
+      ],
+      "sources": [
+        {
+          "title": "GoldHEN (GitHub)",
+          "url": "https://github.com/GoldHEN/GoldHEN"
+        },
+        {
+          "title": "Guía GoldHEN 7.00-13.52",
+          "url": "https://doctorglitch.com/ps4-jailbreak-goldhen-firmware-7-00-13-52/"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "vita",
+      "brandId": "sony",
+      "name": "PlayStation Vita / PS TV",
+      "shortName": "PS Vita",
+      "year": 2011,
+      "formFactor": "handheld",
+      "legacy": false,
+      "mode": "all",
+      "latestFirmware": "3.74",
+      "checkEveryHours": 168,
+      "summary": {
+        "status": "green",
+        "text": "Todas las versiones (hasta la 3.74)"
+      },
+      "versionHint": "Ajustes > Sistema > Información del sistema",
+      "allVersions": {
+        "status": "green",
+        "title": "Jailbreak en todas las versiones",
+        "explanation": "Cualquier PS Vita o PS TV se puede hackear. Hasta la 3.60 se usa HENkaku; de la 3.61 a la 3.74 se usa HENlo desde el navegador (o h-encore²). Después puedes instalar Ensō para que sea permanente.",
+        "method": "HENkaku / HENlo + Ensō"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [
+        {
+          "title": "Vita Hacks Guide",
+          "url": "https://vita.hacks.guide/"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "ps3",
+      "brandId": "sony",
+      "name": "PlayStation 3",
+      "shortName": "PS3",
+      "year": 2006,
+      "formFactor": "home",
+      "legacy": false,
+      "mode": "firmware",
+      "latestFirmware": "4.93",
+      "checkEveryHours": 72,
+      "summary": {
+        "status": "green",
+        "text": "Todas: CFW o HEN según el modelo"
+      },
+      "versionHint": "Ajustes > Ajustes del sistema > Información del sistema",
+      "variants": [
+        {
+          "id": "cfw",
+          "name": "Compatible con CFW",
+          "description": "Fat y Slim antiguas (CECH-20xx, 21xx y algunas 25xx) con firmware de fábrica 3.55 o menor. Compruébalo con el verificador de Ps3Xploit."
+        },
+        {
+          "id": "hen",
+          "name": "No compatible con CFW",
+          "description": "Slim tardías (CECH-25xx/30xx) y Super Slim (CECH-4xxx)."
+        }
+      ],
+      "firmwares": [
+        {
+          "id": "ps3-cfw-355",
+          "label": "Hasta 3.55",
+          "variant": "cfw",
+          "min": "1.00",
+          "max": "3.55",
+          "status": "green",
+          "title": "CFW directo",
+          "explanation": "Puedes instalar un Custom Firmware (Evilnat) directamente. Es permanente.",
+          "method": "CFW Evilnat"
+        },
+        {
+          "id": "ps3-cfw-356-plus",
+          "label": "3.56 – 4.93",
+          "variant": "cfw",
+          "min": "3.56",
+          "max": "4.93",
+          "status": "green",
+          "title": "CFW permanente",
+          "explanation": "Actualiza a la última versión oficial, activa PS3HEN o el Flash Writer de Ps3Xploit desde el navegador y después instala el CFW. El resultado es permanente.",
+          "method": "Ps3Xploit Flash Writer / HEN → CFW Evilnat"
+        },
+        {
+          "id": "ps3-hen-all",
+          "label": "Todas (actualizando a la última)",
+          "variant": "hen",
+          "min": "1.00",
+          "max": "4.93",
+          "status": "green",
+          "title": "HEN disponible",
+          "explanation": "Se usa PS3HEN, que hay que activar en cada arranque. Si quieres algo parecido a un CFW, BadWDSD (2026) usa una Raspberry Pi Pico soldada para arrancar un qCFW.",
+          "method": "PS3HEN (software) · BadWDSD (hardware)"
+        }
+      ],
+      "sources": [
+        {
+          "title": "PS3HEN (ConsoleMods)",
+          "url": "https://consolemods.org/wiki/PS3HEN"
+        },
+        {
+          "title": "BadWDSD (ConsoleMods)",
+          "url": "https://consolemods.org/wiki/BadWDSD"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "psp",
+      "brandId": "sony",
+      "name": "PSP (PlayStation Portable)",
+      "shortName": "PSP",
+      "year": 2004,
+      "formFactor": "handheld",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "6.61",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todas las versiones y modelos"
+      },
+      "versionHint": "Ajustes > Ajustes del sistema > Información del sistema",
+      "allVersions": {
+        "status": "green",
+        "title": "Jailbreak en todas las versiones",
+        "explanation": "Todos los modelos (1000, 2000, 3000, Go y Street) aceptan Custom Firmware. Actualiza a la 6.61 e instala ARK-4 (o su sucesor ARK-5); con Infinity 2 o el instalador de CFW se vuelve permanente.",
+        "method": "ARK-4 / ARK-5 / PRO-C + Infinity 2"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [
+        {
+          "title": "ARK-4 (GitHub)",
+          "url": "https://github.com/PSP-Archive/ARK-4"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "ps2",
+      "brandId": "sony",
+      "name": "PlayStation 2",
+      "shortName": "PS2",
+      "year": 2000,
+      "formFactor": "home",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Jailbreak en todos los modelos",
+        "explanation": "No depende de ningún firmware. FreeMcBoot y OpenTuna funcionan con una memory card; FreeDVDBoot, con un DVD grabado. Con MechaPwn el lector acepta discos grabados. Open PS2 Loader carga juegos desde USB, disco duro o red.",
+        "method": "FreeMcBoot / OpenTuna / FreeDVDBoot + OPL"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [
+        {
+          "title": "Open PS2 Loader (GitHub)",
+          "url": "https://github.com/ps2homebrew/Open-PS2-Loader"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "ps1",
+      "brandId": "sony",
+      "name": "PlayStation (PS1 / PS One)",
+      "shortName": "PS1",
+      "year": 1994,
+      "formFactor": "home",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Jailbreak en todos los modelos",
+        "explanation": "No tiene firmware actualizable. Puedes cargar homebrew y copias con FreePSXBoot (desde una memory card, sin abrir la consola), con Unirom o con un modchip. Los lectores ópticos emulados (xStation, PSIO) cargan juegos desde una tarjeta SD.",
+        "method": "FreePSXBoot / Unirom / modchip / ODE"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [
+        {
+          "title": "FreePSXBoot (GitHub)",
+          "url": "https://github.com/brad-lin/FreePSXBoot"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "switch2",
+      "brandId": "nintendo",
+      "name": "Nintendo Switch 2",
+      "shortName": "Switch 2",
+      "year": 2025,
+      "formFactor": "hybrid",
+      "legacy": false,
+      "mode": "firmware",
+      "latestFirmware": "23.0.1",
+      "checkEveryHours": 24,
+      "summary": {
+        "status": "yellow",
+        "text": "Exploit parcial (ns2jb) en desarrollo"
+      },
+      "versionHint": "Configuración > Consola > Actualización de la consola",
+      "variants": [],
+      "firmwares": [
+        {
+          "id": "sw2-2000-2301",
+          "label": "20.0.0 – 23.0.1",
+          "variant": "",
+          "min": "20.0.0",
+          "max": "23.0.1",
+          "status": "yellow",
+          "title": "En desarrollo / incompleto",
+          "explanation": "ns2jb (publicado el 22 de octubre de 2026) es un exploit solo de software que entra por el juego SmileBASIC 4. Permite homebrew, mods y copias de partidas, pero es temporal (se repite en cada reinicio), necesita un PC en la misma red y no da acceso al kernel ni CFW. Además, SmileBASIC 4 ya no se vende en la eShop.",
+          "method": "ns2jb (SmileBASIC 4) – limitado"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Nintendo Life: Switch 2 exploit",
+          "url": "https://www.nintendolife.com/news/2026/10/switch-2-supposedly-jailbroken-via-software-only-exploit"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "switch1",
+      "brandId": "nintendo",
+      "name": "Nintendo Switch (1)",
+      "shortName": "Switch 1",
+      "year": 2017,
+      "formFactor": "hybrid",
+      "legacy": false,
+      "mode": "firmware",
+      "latestFirmware": "23.0.1",
+      "checkEveryHours": 24,
+      "summary": {
+        "status": "green",
+        "text": "V1 sin parche: sí. V2/Lite/OLED: con chip"
+      },
+      "versionHint": "Configuración > Consola > Actualización de la consola",
+      "variants": [
+        {
+          "id": "unpatched",
+          "name": "V1 sin parche (2017–2018)",
+          "description": "Switch original (caja roja) vulnerable a RCM. Comprueba tu número de serie en ismyswitchpatched.com."
+        },
+        {
+          "id": "patched",
+          "name": "V1 parcheada, V2, Lite u OLED",
+          "description": "Modelos con el fallo RCM corregido de fábrica (incluye la V2 de caja roja de batería mejorada, la Lite y la OLED)."
+        }
+      ],
+      "firmwares": [
+        {
+          "id": "sw1-unpatched-all",
+          "label": "1.0.0 – 23.0.1",
+          "variant": "unpatched",
+          "min": "1.0.0",
+          "max": "23.0.1",
+          "status": "green",
+          "title": "Jailbreak disponible",
+          "explanation": "Con el exploit RCM (fusée gelée) y un jig puedes arrancar Atmosphère (1.12.1 soporta la 23.0.1). Es el mejor caso: no hace falta abrir la consola.",
+          "method": "RCM + Hekate + Atmosphère"
+        },
+        {
+          "id": "sw1-patched-low",
+          "label": "1.0.0 – 4.1.0",
+          "variant": "patched",
+          "min": "1.0.0",
+          "max": "4.1.0",
+          "status": "green",
+          "title": "Jailbreak por software",
+          "explanation": "Solo en V1 parcheadas con firmware muy antiguo: Caffeine/Nereba permiten arrancar Atmosphère sin abrir la consola. No actualices.",
+          "method": "Caffeine / Nereba + Atmosphère"
+        },
+        {
+          "id": "sw1-patched-high",
+          "label": "5.0.0 – 23.0.1",
+          "variant": "patched",
+          "min": "5.0.0",
+          "max": "23.0.1",
+          "status": "orange",
+          "title": "Solo con modchip",
+          "explanation": "Funciona, pero hay que abrir la consola y soldar un modchip (Picofly/HWFLY). Así funciona en V2, Lite y OLED con Atmosphère 1.12.1.",
+          "method": "Modchip (Picofly) + Atmosphère"
+        },
+        {
+          "id": "sw1-future",
+          "label": "Superior a 23.0.1",
+          "variant": "",
+          "min": "23.0.2",
+          "max": "",
+          "status": "yellow",
+          "title": "Esperando a Atmosphère",
+          "explanation": "Cuando Nintendo publica un firmware nuevo, Atmosphère suele tardar unos días en actualizarse. Espera antes de actualizar.",
+          "method": "Esperar actualización de Atmosphère"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Atmosphère (GitHub)",
+          "url": "https://github.com/Atmosphere-NX/Atmosphere/releases"
+        },
+        {
+          "title": "NH Switch Guide",
+          "url": "https://switch.hacks.guide/"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "wiiu",
+      "brandId": "nintendo",
+      "name": "Wii U",
+      "shortName": "Wii U",
+      "year": 2012,
+      "formFactor": "home",
+      "legacy": false,
+      "mode": "all",
+      "latestFirmware": "5.5.6",
+      "checkEveryHours": 168,
+      "summary": {
+        "status": "green",
+        "text": "Todas las versiones (hasta la 5.5.6)"
+      },
+      "versionHint": "Configuración de la consola > (arriba a la derecha) versión",
+      "allVersions": {
+        "status": "green",
+        "title": "Jailbreak en todas las versiones",
+        "explanation": "Todas las Wii U se pueden hackear. Con Aroma + Tiramisu (exploit de navegador o UDPIH por USB) tienes homebrew permanente.",
+        "method": "Aroma / Tiramisu (navegador o UDPIH)"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [
+        {
+          "title": "Wii U Hacks Guide",
+          "url": "https://wiiu.hacks.guide/"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "n3ds",
+      "brandId": "nintendo",
+      "name": "Nintendo 3DS / 2DS",
+      "shortName": "3DS",
+      "year": 2011,
+      "formFactor": "clamshell",
+      "legacy": false,
+      "mode": "all",
+      "latestFirmware": "11.17.0",
+      "checkEveryHours": 168,
+      "summary": {
+        "status": "green",
+        "text": "Todas las versiones (hasta la 11.17.0)"
+      },
+      "versionHint": "Configuración de la consola (abajo a la derecha)",
+      "allVersions": {
+        "status": "green",
+        "title": "Jailbreak en todas las versiones",
+        "explanation": "Todos los modelos (3DS, 2DS, New 3DS y New 2DS XL) se pueden hackear con cualquier firmware. MSET9 solo necesita la tarjeta SD. Instala Luma3DS como CFW permanente.",
+        "method": "MSET9 + Luma3DS"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [
+        {
+          "title": "3DS Hacks Guide",
+          "url": "https://3ds.hacks.guide/"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "wii",
+      "brandId": "nintendo",
+      "name": "Wii / Wii mini",
+      "shortName": "Wii",
+      "year": 2006,
+      "formFactor": "home",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "4.3",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todas las versiones"
+      },
+      "versionHint": "Ajustes de Wii (arriba a la derecha)",
+      "allVersions": {
+        "status": "green",
+        "title": "Jailbreak en todas las versiones",
+        "explanation": "Cualquier Wii (también la Wii mini) se puede hackear: LetterBomb o Wilbrand desde la SD, o Bluebomb por Bluetooth. Instala el Homebrew Channel y Priiloader.",
+        "method": "LetterBomb / Wilbrand / Bluebomb"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [
+        {
+          "title": "Wii Hacks Guide",
+          "url": "https://wii.hacks.guide/"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "nds",
+      "brandId": "nintendo",
+      "name": "Nintendo DS / DS Lite / DSi",
+      "shortName": "DS",
+      "year": 2004,
+      "formFactor": "clamshell",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "1.4.5",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Jailbreak en todos los modelos",
+        "explanation": "Para DS y DS Lite basta una flashcard (tipo R4). La DSi se hackea por software con Memory Pit (exploit de la cámara) e Unlaunch, sea cual sea su versión.",
+        "method": "Flashcard · Memory Pit + Unlaunch (DSi)"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [
+        {
+          "title": "DSi Guide",
+          "url": "https://dsi.cfw.guide/"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "gamecube",
+      "brandId": "nintendo",
+      "name": "GameCube",
+      "shortName": "GameCube",
+      "year": 2001,
+      "formFactor": "home",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Jailbreak en todos los modelos",
+        "explanation": "Swiss carga homebrew y copias. Se arranca con PicoBoot (modchip sencillo), con exploits de juegos o con un adaptador SD2SP2. GC Loader sustituye el lector por una tarjeta SD.",
+        "method": "Swiss + PicoBoot / SD2SP2 / GC Loader"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [
+        {
+          "title": "Swiss (GitHub)",
+          "url": "https://github.com/emukidid/swiss-gc"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "gba",
+      "brandId": "nintendo",
+      "name": "Game Boy Advance",
+      "shortName": "GBA",
+      "year": 2001,
+      "formFactor": "handheld",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Funciona en todos los modelos",
+        "explanation": "No tiene firmware. Con un flashcart (EZ-Flash Omega, EverDrive GBA) cargas homebrew y copias desde una microSD.",
+        "method": "Flashcart"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "n64",
+      "brandId": "nintendo",
+      "name": "Nintendo 64",
+      "shortName": "N64",
+      "year": 1996,
+      "formFactor": "retro",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Funciona en todos los modelos",
+        "explanation": "No tiene firmware. Con un flashcart (EverDrive 64, SummerCart64) cargas homebrew y copias desde una tarjeta SD.",
+        "method": "Flashcart"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "gbc",
+      "brandId": "nintendo",
+      "name": "Game Boy / Game Boy Color",
+      "shortName": "Game Boy",
+      "year": 1989,
+      "formFactor": "handheld",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Funciona en todos los modelos",
+        "explanation": "No tiene firmware. Con un flashcart (EverDrive GB, EZ-Flash Junior) cargas homebrew y copias.",
+        "method": "Flashcart"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "nesclassic",
+      "brandId": "nintendo",
+      "name": "NES / SNES Classic Mini",
+      "shortName": "Classic Mini",
+      "year": 2016,
+      "formFactor": "retro",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Jailbreak en todos los modelos",
+        "explanation": "Con hakchi2 CE y un cable USB (modo FEL) puedes añadir juegos y emuladores. No tiene actualizaciones que lo bloqueen.",
+        "method": "hakchi2 CE"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "snes",
+      "brandId": "nintendo",
+      "name": "Super Nintendo (SNES)",
+      "shortName": "SNES",
+      "year": 1990,
+      "formFactor": "retro",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Funciona en todos los modelos",
+        "explanation": "No tiene firmware. FXPak Pro (SD2SNES) o un EverDrive cargan homebrew y copias desde una SD, incluidos juegos con chips especiales.",
+        "method": "Flashcart"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "nes",
+      "brandId": "nintendo",
+      "name": "NES / Famicom",
+      "shortName": "NES",
+      "year": 1983,
+      "formFactor": "retro",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Funciona en todos los modelos",
+        "explanation": "No tiene firmware. Con un flashcart (EverDrive N8) cargas homebrew y copias.",
+        "method": "Flashcart"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "xseries",
+      "brandId": "microsoft",
+      "name": "Xbox Series X | S",
+      "shortName": "Series X|S",
+      "year": 2020,
+      "formFactor": "home",
+      "legacy": false,
+      "mode": "firmware",
+      "latestFirmware": "",
+      "checkEveryHours": 24,
+      "summary": {
+        "status": "red",
+        "text": "Sin jailbreak completo"
+      },
+      "versionHint": "Configuración > Sistema > Información de la consola (Versión del SO)",
+      "variants": [],
+      "firmwares": [
+        {
+          "id": "xs-cd",
+          "label": "10.0.25398.4478 – 10.0.25398.4909",
+          "variant": "",
+          "min": "10.0.25398.4478",
+          "max": "10.0.25398.4909",
+          "status": "yellow",
+          "title": "Exploit parcial",
+          "explanation": "Collateral Damage (julio de 2024) da control del kernel de SystemOS, pero no es un jailbreak: no ejecuta juegos sin firma ni salta el hipervisor. Solo funciona en estas versiones exactas.",
+          "method": "Collateral Damage (Game Script)"
+        },
+        {
+          "id": "xs-other",
+          "label": "Cualquier otra versión",
+          "variant": "",
+          "min": "",
+          "max": "",
+          "status": "red",
+          "title": "Sin jailbreak",
+          "explanation": "No hay ningún exploit público. Para emuladores y homebrew puedes usar el Modo Desarrollador oficial de Microsoft (cuenta de desarrollador de pago), que no es un jailbreak.",
+          "method": "—"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Collateral Damage (GitHub)",
+          "url": "https://github.com/exploits-forsale/collateral-damage"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "xone",
+      "brandId": "microsoft",
+      "name": "Xbox One",
+      "shortName": "Xbox One",
+      "year": 2013,
+      "formFactor": "home",
+      "legacy": false,
+      "mode": "firmware",
+      "latestFirmware": "",
+      "checkEveryHours": 24,
+      "summary": {
+        "status": "yellow",
+        "text": "Exploits parciales, en desarrollo"
+      },
+      "versionHint": "Configuración > Sistema > Información de la consola (Versión del SO)",
+      "variants": [],
+      "firmwares": [
+        {
+          "id": "xo-cd",
+          "label": "10.0.25398.4478 – 10.0.25398.4909",
+          "variant": "",
+          "min": "10.0.25398.4478",
+          "max": "10.0.25398.4909",
+          "status": "yellow",
+          "title": "Exploit parcial",
+          "explanation": "Collateral Damage (julio de 2024) da control del kernel de SystemOS, pero no es un jailbreak: no ejecuta juegos sin firma. Solo funciona en estas versiones exactas.",
+          "method": "Collateral Damage (Game Script)"
+        },
+        {
+          "id": "xo-other",
+          "label": "Cualquier otra versión",
+          "variant": "",
+          "min": "",
+          "max": "",
+          "status": "yellow",
+          "title": "En investigación (Bliss)",
+          "explanation": "En marzo de 2026 se presentó Bliss en RE//verse 2026, un ataque por hardware al Boot ROM de la Xbox One que permitiría ejecutar código sin firma. Todavía no hay una herramienta pública para usuarios.",
+          "method": "Bliss (hardware) – sin herramienta pública"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Collateral Damage (GitHub)",
+          "url": "https://github.com/exploits-forsale/collateral-damage"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "x360",
+      "brandId": "microsoft",
+      "name": "Xbox 360",
+      "shortName": "Xbox 360",
+      "year": 2005,
+      "formFactor": "home",
+      "legacy": false,
+      "mode": "all",
+      "latestFirmware": "2.0.17559.0",
+      "checkEveryHours": 168,
+      "summary": {
+        "status": "green",
+        "text": "Todas las versiones y modelos"
+      },
+      "versionHint": "Configuración > Sistema > Información de la consola",
+      "allVersions": {
+        "status": "green",
+        "title": "Jailbreak en todas las versiones",
+        "explanation": "Cualquier Xbox 360 se puede hackear. BadUpdate (2025) es un exploit de software temporal que funciona con el último dashboard. RGH 3.0 / RGH 1.2 (hardware, permanente) funciona en casi todos los modelos.",
+        "method": "BadUpdate (software) · RGH 3.0 (hardware)"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [
+        {
+          "title": "BadUpdate (GitHub)",
+          "url": "https://github.com/grimdoomer/Xbox360BadUpdate"
+        },
+        {
+          "title": "ConsoleMods Xbox 360",
+          "url": "https://consolemods.org/wiki/Xbox_360"
+        }
+      ],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "xbox",
+      "brandId": "microsoft",
+      "name": "Xbox (original)",
+      "shortName": "Xbox",
+      "year": 2001,
+      "formFactor": "home",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todas las versiones"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Jailbreak en todas las versiones",
+        "explanation": "El softmod con el exploit ENDGAME no necesita ningún juego. También hay modchips y TSOP flash. Con un disco duro grande puedes cargar copias y emuladores.",
+        "method": "Softmod ENDGAME / Rocky5 · modchip"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "dreamcast",
+      "brandId": "sega",
+      "name": "Dreamcast",
+      "shortName": "Dreamcast",
+      "year": 1998,
+      "formFactor": "home",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Funciona en todos los modelos",
+        "explanation": "La mayoría de las unidades leen CD-R gracias al fallo MIL-CD. Las últimas unidades (2001) no lo tienen, pero funcionan con un lector óptico emulado (GDEMU, MODE).",
+        "method": "CD-R (MIL-CD) · GDEMU / MODE"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "saturn",
+      "brandId": "sega",
+      "name": "Sega Saturn",
+      "shortName": "Saturn",
+      "year": 1994,
+      "formFactor": "home",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Funciona en todos los modelos",
+        "explanation": "Con un cartucho como Saroo o con lectores ópticos emulados (Fenrir, Rhea/Phoebe) cargas juegos desde una SD. Pseudo Saturn Kai permite discos grabados.",
+        "method": "Saroo / ODE / Pseudo Saturn Kai"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "genesis",
+      "brandId": "sega",
+      "name": "Mega Drive / Genesis",
+      "shortName": "Mega Drive",
+      "year": 1988,
+      "formFactor": "retro",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Funciona en todos los modelos",
+        "explanation": "No tiene firmware. Con un flashcart (Mega EverDrive) cargas homebrew y copias, incluidos juegos de Mega-CD y 32X en algunos modelos.",
+        "method": "Flashcart"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "gamegear",
+      "brandId": "sega",
+      "name": "Game Gear",
+      "shortName": "Game Gear",
+      "year": 1990,
+      "formFactor": "handheld",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Funciona en todos los modelos",
+        "explanation": "No tiene firmware. Un flashcart (Master EverDrive con adaptador) carga juegos desde una SD.",
+        "method": "Flashcart"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "mastersystem",
+      "brandId": "sega",
+      "name": "Master System",
+      "shortName": "Master System",
+      "year": 1985,
+      "formFactor": "retro",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Funciona en todos los modelos",
+        "explanation": "No tiene firmware. Un flashcart (Master EverDrive) carga homebrew y copias.",
+        "method": "Flashcart"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "jaguar",
+      "brandId": "atari",
+      "name": "Atari Jaguar",
+      "shortName": "Jaguar",
+      "year": 1993,
+      "formFactor": "retro",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Funciona en todos los modelos",
+        "explanation": "No tiene firmware. Jaguar GameDrive o SkunkBoard cargan homebrew y copias.",
+        "method": "Flashcart (GameDrive)"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    },
+    {
+      "id": "atari2600",
+      "brandId": "atari",
+      "name": "Atari 2600",
+      "shortName": "2600",
+      "year": 1977,
+      "formFactor": "retro",
+      "legacy": true,
+      "mode": "all",
+      "latestFirmware": "",
+      "checkEveryHours": 720,
+      "summary": {
+        "status": "green",
+        "text": "Todos los modelos"
+      },
+      "versionHint": "",
+      "allVersions": {
+        "status": "green",
+        "title": "Funciona en todos los modelos",
+        "explanation": "No tiene firmware. Harmony Cart o UnoCart cargan homebrew y copias desde una SD.",
+        "method": "Flashcart (Harmony / UnoCart)"
+      },
+      "variants": [],
+      "firmwares": [],
+      "sources": [],
+      "updatedAt": "2026-10-28T00:00:00Z"
+    }
+  ]
+}
