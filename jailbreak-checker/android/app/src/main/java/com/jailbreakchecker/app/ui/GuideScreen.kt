@@ -61,6 +61,7 @@ private val Guide.difficultyLabel: String
 @Composable
 fun GuideScreen(
     guide: Guide?,
+    reviewedAt: String,
     hasApiKey: Boolean,
     updating: Boolean,
     onUpdate: () -> Unit,
@@ -103,7 +104,7 @@ fun GuideScreen(
                 Text(guide.summary, style = MaterialTheme.typography.bodyLarge)
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    if (guide.updatedAt.isNotBlank()) "Revisada por IA ${relativeTime(guide.updatedAt)} en las fuentes oficiales." else "Versión incluida en la app (octubre de 2026).",
+                    if (guide.updatedAt.isNotBlank()) "Revisada por IA ${relativeTime(guide.updatedAt)} en las fuentes oficiales." else if (reviewedAt.isNotBlank()) "Verificada en las fuentes oficiales el ${reviewedAt.split("-").reversed().joinToString("/")}." else "Versión incluida en la app.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

@@ -245,8 +245,8 @@
       "allVersions": {
         "status": "green",
         "title": "Jailbreak en todas las versiones",
-        "explanation": "Cualquier PS Vita o PS TV se puede hackear. Hasta la 3.60 se usa HENkaku; de la 3.61 a la 3.74 se usa HENlo desde el navegador (o h-encore²). Después puedes instalar Ensō para que sea permanente.",
-        "method": "HENkaku / HENlo + Ensō",
+        "explanation": "Cualquier PS Vita o PS TV se puede hackear. Se actualiza a la 3.74, se activa HENkaku con HENlo desde el navegador (jailbreak.psp2.dev) y con VitaDeploy se instala la 3.65 con Ensō, que deja el CFW permanente.",
+        "method": "HENlo + VitaDeploy + Ensō",
         "guideId": "vita-henlo"
       },
       "variants": [],
@@ -257,7 +257,7 @@
           "url": "https://vita.hacks.guide/"
         }
       ],
-      "updatedAt": "2026-10-28T00:00:00Z"
+      "updatedAt": "2026-10-29T00:00:00Z"
     },
     {
       "id": "ps3",
@@ -640,8 +640,8 @@
       "allVersions": {
         "status": "green",
         "title": "Jailbreak en todas las versiones",
-        "explanation": "Cualquier Wii (también la Wii mini) se puede hackear: LetterBomb o Wilbrand desde la SD, o Bluebomb por Bluetooth. Instala el Homebrew Channel y Priiloader.",
-        "method": "LetterBomb / Wilbrand / Bluebomb",
+        "explanation": "Cualquier Wii se puede hackear. Con SD usa Wilbrand (carta en el Tablón de Wii); sin SD, str2hax (cambiando el DNS); en la Wii mini, Bluebomb. Después instala el Homebrew Channel, BootMii y Priiloader y haz copia de la NAND.",
+        "method": "Wilbrand / str2hax / Bluebomb",
         "guideId": "wii-letterbomb"
       },
       "variants": [],
@@ -652,7 +652,7 @@
           "url": "https://wii.hacks.guide/"
         }
       ],
-      "updatedAt": "2026-10-28T00:00:00Z"
+      "updatedAt": "2026-10-29T00:00:00Z"
     },
     {
       "id": "nds",
@@ -1009,7 +1009,7 @@
       "allVersions": {
         "status": "green",
         "title": "Jailbreak en todas las versiones",
-        "explanation": "Cualquier Xbox 360 se puede hackear. BadUpdate (2025) es un exploit de software temporal que funciona con el último dashboard. RGH 3.0 / RGH 1.2 (hardware, permanente) funciona en casi todos los modelos.",
+        "explanation": "Cualquier Xbox 360 se puede hackear. BadUpdate (2025) es un exploit de software temporal para el dashboard 17559 que usa Rock Band Blitz y ejecuta un programa sin firmar. Para un hack permanente se usa RGH 3.0 (soldadura).",
         "method": "BadUpdate (software) · RGH 3.0 (hardware)",
         "guideId": "x360-badupdate"
       },
@@ -1025,7 +1025,7 @@
           "url": "https://consolemods.org/wiki/Xbox_360"
         }
       ],
-      "updatedAt": "2026-10-28T00:00:00Z"
+      "updatedAt": "2026-10-29T00:00:00Z"
     },
     {
       "id": "xbox",

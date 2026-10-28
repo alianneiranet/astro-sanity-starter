@@ -20,18 +20,23 @@ class Repository(private val context: Context) {
 
     val bundled: Catalog by lazy { loadCatalog(context) }
 
-    /** Guides as shipped with the app (the AI may have newer versions, see [guides]). */
-    val bundledGuides: List<Guide> by lazy {
+    private val guideCatalog: GuideCatalog by lazy {
         val text = context.assets.open("guides.json").bufferedReader().use { it.readText() }
-        json.decodeFromString(GuideCatalog.serializer(), text).guides
+        json.decodeFromString(GuideCatalog.serializer(), text)
     }
+
+    /** Guides as shipped with the app (the AI may have newer versions, see [guides]). */
+    val bundledGuides: List<Guide> get() = guideCatalog.guides
+
+    /** When the bundled guides were last checked against the official sources (YYYY-MM-DD). */
+    val guidesReviewedAt: String get() = guideCatalog.reviewedAt
 
     val feedSources: List<FeedSource> by lazy {
         val text = context.assets.open("sources.json").bufferedReader().use { it.readText() }
         json.decodeFromString(FeedSourceList.serializer(), text).sources
     }
 
-    fun guides(): Flow<List<Guide>> = store.state.map { mergeGuides(bundledGuides, it) }
+    fun guides(): Flow<List<Guide>> = store.state.map { mergeGuides(bundledGuides, it, guidesReviewedAt) }
 
     /** Console ids that have an SVG logo in assets/logos. */
     val logoIds: Set<String> by lazy {
@@ -71,8 +76,9 @@ class Repository(private val context: Context) {
             else -> JsonPrimitive(value.toString())
         }
 
-        fun mergeGuides(bundled: List<Guide>, state: LocalState): List<Guide> =
-            bundled.map { state.guides[it.id] ?: it }
+        /** An AI rewrite wins only if it is newer than the review of the guides shipped with the app. */
+        fun mergeGuides(bundled: List<Guide>, state: LocalState, bundledReviewedAt: String = ""): List<Guide> =
+            bundled.map { base -> state.guides[base.id]?.takeIf { it.updatedAt > bundledReviewedAt } ?: base }
 
         /**
          * An AI-updated console wins only while it is newer than the bundled one, so a new

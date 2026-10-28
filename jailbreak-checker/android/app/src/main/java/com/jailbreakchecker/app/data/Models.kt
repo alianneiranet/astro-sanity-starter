@@ -174,5 +174,7 @@ data class Guide(
 
 @Serializable
 data class GuideCatalog(
+    /** Date (YYYY-MM-DD) the bundled guides were checked against the official sources. */
+    val reviewedAt: String = "",
     val guides: List<Guide> = emptyList(),
 )

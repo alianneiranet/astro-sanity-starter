@@ -1,68 +1,75 @@
 {
+  "reviewedAt": "2026-10-28",
   "guides": [
     {
       "id": "switch-rcm",
       "title": "Switch V1 sin parche: Atmosphère con RCM",
       "consoleIds": ["switch1"],
       "difficulty": "media",
-      "time": "1 hora",
-      "summary": "Arrancas la consola en modo de recuperación (RCM) con un jig, le envías el payload Hekate desde un PC o teléfono, haces una copia de tu NAND y lanzas Atmosphère en una emuMMC.",
+      "time": "1–2 horas",
+      "summary": "Con un jig entras en el modo RCM, envías el payload hekate desde el PC o el teléfono con OmniRCM, haces copia de la NAND y arrancas Atmosphère. Lo recomendable es usar una emuMMC (una copia del sistema en la microSD) y dejar el sistema original para jugar online.",
       "requirements": [
-        "Switch V1 sin parche (compruébalo en ismyswitchpatched.com con el número de serie)",
-        "Jig RCM (pieza que se mete en el riel derecho del Joy-Con) o un clip",
-        "Cable USB-C a USB-A o USB-C",
-        "PC con Windows (TegraRcmGUI), Linux/Mac (fusee-launcher), navegador Chrome (web RCM) o un teléfono Android (Rekado)",
-        "Tarjeta microSD de 64 GB o más, formateada en FAT32"
+        "Switch V1 sin parche: compruébalo con el número de serie (Configuración > Sistema > Información de serie) en la guía o en ismyswitchpatched.com",
+        "Jig RCM para el riel derecho (no uses clips ni papel de aluminio: puede dañar la consola)",
+        "Cable USB-C con datos",
+        "PC (Windows, macOS o Linux), teléfono Android o navegador Chrome/Edge",
+        "microSD de 128 GB o más si vas a crear la emuMMC (recomendado)",
+        "Atmosphère 1.12.1 o posterior y hekate 6.5.4 o posterior (soportan hasta el firmware 23.0.1)"
       ],
       "steps": [
-        { "title": "Prepara la microSD", "text": "Formatea la tarjeta en FAT32. Descarga la última versión de Hekate y de Atmosphère de sus GitHub oficiales y copia su contenido en la raíz de la microSD, tal como indica la guía de NH Switch Guide." },
-        { "title": "Entra en modo RCM", "text": "Apaga la Switch del todo (mantén el botón de encendido, Opciones de energía > Apagar). Mete el jig en el riel derecho, mantén pulsado Volumen + y pulsa el botón de encendido. La pantalla debe quedarse negra: eso es RCM." },
-        { "title": "Envía el payload", "text": "Conecta la consola al PC o teléfono por USB y envía el archivo hekate_ctcaer_X.X.X.bin con TegraRcmGUI, fusee-launcher, la web RCM o Rekado. Aparecerá el menú de Hekate." },
-        { "title": "Haz copia de seguridad de la NAND", "text": "En Hekate: Tools > Backup eMMC > eMMC BOOT0 & BOOT1 y luego eMMC RAW GPP. Copia la carpeta backup de la microSD a tu PC y guárdala en un lugar seguro. Es tu salvavidas si algo sale mal." },
-        { "title": "Crea una emuMMC", "text": "En Hekate: emuMMC > Create emuMMC > SD Partition. Así usarás el sistema hackeado en una copia y no tocarás el original." },
-        { "title": "Lanza Atmosphère", "text": "En Hekate: Launch > Atmosphere FSS0 emuMMC. Se carga el sistema con homebrew (abre el Álbum manteniendo R para entrar al Homebrew Menu)." },
-        { "title": "Cada vez que reinicies", "text": "Al apagarla del todo hay que repetir el paso 2 y 3 (jig + payload). Para no perder el hack, usa el modo reposo en lugar de apagar." }
+        { "title": "Antes de empezar", "text": "Si vas a usar emuMMC: desactiva la copia automática de partidas en la nube y marca esta Switch como consola principal de tu cuenta. Instala al menos un juego o demo de la eShop (sirve para abrir el Homebrew Menu con todas sus funciones)." },
+        { "title": "Entra en modo RCM", "text": "Apaga la consola del todo. Mete el jig en el riel derecho, mantén pulsado Volumen + y pulsa Power una vez. Si la pantalla se queda negra (no aparece el logo de Nintendo) estás en RCM. Quita el jig." },
+        { "title": "Envía el payload hekate", "text": "Descarga hekate (hekate_ctcaer_X.X.X_Nyx_X.X.X.zip) y usa el archivo hekate_ctcaer_X.X.X.bin. Conecta la Switch por USB y abre OmniRCM: en Windows pulsa Install Driver, luego Update, elige hekate e Inject Payload. En Android usa la app OmniRCM (Fetch Payloads > hekate > Inject). Sin instalar nada: omnircm.nintendohomebrew.com/web en Chrome, Connect device > APX > hekate > Inject." },
+        { "title": "Particiona la microSD y crea la emuMMC", "text": "En hekate: Tools > Partition SD card. Deja espacio para la emuMMC (unos 29 GB en tarjetas de 128 GB) y aplica. Después: emuMMC > Create emuMMC > SD Partition. Este paso borra la microSD: guarda antes lo que tengas." },
+        { "title": "Prepara la microSD", "text": "Con hekate en Tools > USB tools > SD card la Switch aparece en el PC. Copia el contenido del zip de Atmosphère (atmosphere-X-master-...+hbl+hbmenu.zip) a la raíz, luego la carpeta bootloader de hekate y de bootlogos.zip, y el archivo hekate_ipl.ini dentro de bootloader. Crea la carpeta atmosphere/hosts y pon dentro el archivo emummc.txt de la guía (bloquea los servidores de Nintendo: evita baneos)." },
+        { "title": "Haz las copias de seguridad", "text": "En hekate: Tools > Backup eMMC > eMMC BOOT0 & BOOT1, y después eMMC RAW GPP (puede tardar más de una hora). Luego Tools > USB tools > SD card y copia la carpeta backup a tu PC. Guárdala comprimida en un lugar seguro: es tu salvavidas." },
+        { "title": "Arranca Atmosphère", "text": "En hekate: Launch > Atmosphere PKG3 emuMMC. En Configuración > Sistema la versión debe terminar en 'AMS … E'. Para el Homebrew Menu, mantén R mientras abres cualquier juego (o abre el Álbum, con menos memoria)." },
+        { "title": "Cada vez que la apagues", "text": "Al apagarla del todo hay que repetir el jig y el payload. En reposo el hack se mantiene. Antes de actualizar el firmware, actualiza Atmosphère y hekate a una versión que lo soporte." }
       ],
       "warnings": [
-        "No conectes la emuMMC a internet con juegos o modificaciones no oficiales: Nintendo banea consolas.",
-        "Antes de actualizar el firmware, comprueba que la última versión de Atmosphère lo soporta."
+        "Nunca conectes la emuMMC a los servidores de Nintendo: usa el sistema original (sysMMC) para jugar online. Mezclar ambos online acaba en baneo.",
+        "El jig nunca debe tocar el pin 4 del riel (lleva 5 V).",
+        "Si la pantalla sigue negra tras enviar el payload, el archivo está dañado o tu consola está parcheada."
       ],
       "links": [
         { "title": "NH Switch Guide (guía completa)", "url": "https://switch.hacks.guide/" },
-        { "title": "¿Mi Switch está parcheada?", "url": "https://ismyswitchpatched.com/" },
-        { "title": "Atmosphère (GitHub)", "url": "https://github.com/Atmosphere-NX/Atmosphere/releases" },
-        { "title": "Hekate (GitHub)", "url": "https://github.com/CTCaer/hekate/releases" }
+        { "title": "Enviar el payload (OmniRCM)", "url": "https://switch.hacks.guide/user_guide/rcm/sending_payload" },
+        { "title": "Atmosphère (descargas)", "url": "https://github.com/Atmosphere-NX/Atmosphere/releases" },
+        { "title": "hekate (descargas)", "url": "https://github.com/CTCaer/hekate/releases" },
+        { "title": "¿Mi Switch está parcheada?", "url": "https://ismyswitchpatched.com/" }
       ]
     },
     {
       "id": "switch-modchip",
-      "title": "Switch V2 / Lite / OLED: modchip",
+      "title": "Switch V2 / Lite / OLED: modchip Picofly",
       "consoleIds": ["switch1"],
       "difficulty": "dificil",
       "time": "2–4 horas (o un técnico)",
-      "summary": "Estos modelos solo se pueden hackear abriendo la consola y soldando un modchip en la placa. Después se usa la misma microSD con Hekate y Atmosphère que en una V1.",
+      "summary": "Estos modelos (procesador Mariko) solo se pueden hackear abriendo la consola y soldando un modchip. El único que soporta la guía de la comunidad es Picofly (basado en Raspberry Pi RP2040). Con el chip, la consola arranca sola el archivo payload.bin de la microSD, sin jig ni PC.",
       "requirements": [
-        "Modchip Picofly (RP2040) o HWFLY compatible con tu modelo (V2, Lite u OLED)",
-        "Estación de soldadura de punta fina, flux, cable esmaltado muy fino y microscopio o lupa",
-        "Destornilladores tri-wing y Phillips, kapton tape",
-        "Experiencia previa en microsoldadura (si no la tienes, llévala a un técnico)",
-        "Tarjeta microSD de 64 GB o más en FAT32"
+        "Modchip Picofly (RP2040) con sus cables/placas para tu modelo",
+        "Experiencia en microsoldadura, estación de soldadura de punta fina, flux, microscopio o lupa, kapton",
+        "Destornilladores tri-wing y Phillips",
+        "microSD de 128 GB o más para emuMMC",
+        "Si no tienes experiencia: un técnico de confianza que ya haya instalado Picofly"
       ],
       "steps": [
-        { "title": "Decide si lo haces tú", "text": "Los puntos de soldadura son diminutos (junto al procesador y la eMMC). Un error puede dejar la consola inservible. La opción recomendada es un técnico de confianza que ya haya instalado Picofly." },
-        { "title": "Abre la consola", "text": "Retira la carcasa trasera, el disipador y el blindaje metálico siguiendo el despiece de tu modelo (iFixit tiene guías de cada uno)." },
-        { "title": "Suelda el chip", "text": "Suelda los cables del modchip a los puntos de la eMMC, del procesador (condensadores del CPU) y a la alimentación, según el diagrama oficial de tu chip y modelo. Aísla todo con kapton." },
-        { "title": "Primer arranque", "text": "Arranca sin cerrar del todo. Con Picofly, el LED indica si el glitch funciona. Si la microSD tiene Hekate preparada (payload.bin en la raíz), aparecerá el menú de Hekate." },
-        { "title": "Copia de la NAND y emuMMC", "text": "Igual que en la guía RCM: haz la copia de seguridad de la eMMC en Hekate, guárdala en tu PC y crea una emuMMC." },
-        { "title": "Cierra y lanza Atmosphère", "text": "Monta la consola de nuevo y arranca Atmosphère desde Hekate. A partir de ahora arranca hackeada sin jig ni PC." }
+        { "title": "Decide quién lo instala", "text": "Los puntos de soldadura (junto al procesador y la eMMC) son diminutos y un error puede dejar la placa inservible. La propia guía recomienda que lo haga alguien de confianza si no tienes experiencia." },
+        { "title": "Instala el chip", "text": "Abre la consola, retira el disipador y los blindajes y suelda Picofly siguiendo el diagrama oficial de tu modelo (V2, Lite u OLED). Aísla con kapton." },
+        { "title": "Prepara hekate como payload.bin", "text": "Descarga hekate, renombra hekate_ctcaer_X.X.X.bin a payload.bin y cópialo en la raíz de la microSD junto con la carpeta bootloader. Al encender, el chip carga hekate automáticamente." },
+        { "title": "Particiona la microSD y crea la emuMMC", "text": "Igual que en la guía RCM: Tools > Partition SD card y emuMMC > Create emuMMC > SD Partition." },
+        { "title": "Prepara la microSD", "text": "Copia Atmosphère, la carpeta bootloader de hekate y bootlogos, hekate_ipl.ini y el archivo atmosphere/hosts/emummc.txt, como indica la guía." },
+        { "title": "Copia de la NAND y arranque", "text": "Haz Tools > Backup eMMC (BOOT0 & BOOT1 y RAW GPP), guarda la carpeta backup en el PC y arranca con Launch > Atmosphere PKG3 emuMMC." }
       ],
       "warnings": [
-        "Anula la garantía y una mala soldadura puede romper la placa.",
-        "No uses la emuMMC con cosas no oficiales conectada a internet: riesgo de baneo."
+        "Anula la garantía; una mala soldadura puede romper la consola.",
+        "La guía solo ayuda con chips comerciales (HWFLY, SX Core/Lite) a actualizar su firmware, no a instalarlos.",
+        "No conectes la emuMMC a los servidores de Nintendo."
       ],
       "links": [
+        { "title": "NH Switch Guide: modchips", "url": "https://switch.hacks.guide/user_guide/modchip/" },
         { "title": "NH Switch Guide", "url": "https://switch.hacks.guide/" },
-        { "title": "Picofly (información e instalación)", "url": "https://wiki.hacks.guide/wiki/Switch:Picofly" }
+        { "title": "hekate (descargas)", "url": "https://github.com/CTCaer/hekate/releases" }
       ]
     },
     {
@@ -71,137 +78,145 @@
       "consoleIds": ["switch2"],
       "difficulty": "media",
       "time": "30 min",
-      "summary": "ns2jb es un exploit temporal que entra por el juego SmileBASIC 4. Permite homebrew limitado, mods y copias de partidas, pero no es un CFW completo y hay que repetirlo en cada reinicio.",
+      "summary": "ns2jb (Sammy Hajhamid, octubre de 2026) es un exploit solo de software que entra por SmileBASIC 4. Es temporal: no deja cambios en la consola, se pierde al reiniciar y no da CFW ni control del kernel. La versión pública del README es una demostración limitada.",
       "requirements": [
-        "Nintendo Switch 2 con firmware hasta 23.0.1",
-        "SmileBASIC 4 comprado antes de que desapareciera de la eShop",
-        "Un PC en la misma red Wi-Fi que la consola"
+        "Nintendo Switch 2 con firmware 23.0.1 o anterior",
+        "SmileBASIC 4 comprado (ha desaparecido de algunas eShop)",
+        "Un PC en la misma red Wi-Fi"
       ],
       "steps": [
-        { "title": "No actualices", "text": "Desactiva las actualizaciones automáticas (Configuración > Consola). Nintendo probablemente parcheará el fallo en el próximo firmware." },
-        { "title": "Descarga ns2jb", "text": "Descarga ns2jb únicamente desde el repositorio oficial de su autor y lee su README: ahí están los pasos exactos de la versión actual." },
-        { "title": "Prepara el PC", "text": "Ejecuta en el PC el servidor que incluye ns2jb, en la misma red que la consola." },
-        { "title": "Lanza el exploit", "text": "Abre SmileBASIC 4 en la Switch 2 y carga el programa indicado en el README. Si funciona, aparece el Homebrew Launcher." },
-        { "title": "Después de reiniciar", "text": "El exploit se pierde al reiniciar o apagar; repite los pasos 3 y 4." }
+        { "title": "No actualices", "text": "Desactiva la actualización automática del sistema. Es muy probable que Nintendo parchee el fallo en el próximo firmware." },
+        { "title": "Lee el README oficial", "text": "Descarga ns2jb solo del repositorio de su autor y sigue su README, que es donde están los pasos exactos de la versión actual." },
+        { "title": "Prepara el PC", "text": "Ejecuta en el PC el servidor que incluye el proyecto, en la misma red que la consola." },
+        { "title": "Lanza el exploit", "text": "Abre SmileBASIC 4 en la Switch 2 y carga el programa que indica el README." },
+        { "title": "Después de reiniciar", "text": "El exploit desaparece al reiniciar: repite los pasos 3 y 4." }
       ],
       "warnings": [
-        "Es un proyecto muy nuevo (octubre de 2026): puede fallar o cambiar.",
-        "Cuidado con webs que venden o regalan 'jailbreaks de Switch 2': la mayoría son estafas."
+        "Proyecto experimental: puede fallar o cambiar en cualquier momento.",
+        "Las webs que venden o 'regalan' jailbreaks de Switch 2 son estafas."
       ],
       "links": [
-        { "title": "Noticia en Nintendo Life", "url": "https://www.nintendolife.com/news/2026/10/switch-2-supposedly-jailbroken-via-software-only-exploit" }
+        { "title": "Noticia en Nintendo Life", "url": "https://www.nintendolife.com/news/2026/10/switch-2-supposedly-jailbroken-via-software-only-exploit" },
+        { "title": "Análisis en Android Authority", "url": "https://www.androidauthority.com/nintendo-switch-2-software-jailbreak-3727013/" }
       ]
     },
     {
       "id": "ps5-jailbreak",
-      "title": "PS5: etaHEN con Relapse / UMTX",
+      "title": "PS5: Relapse + etaHEN",
       "consoleIds": ["ps5"],
       "difficulty": "media",
       "time": "30–45 min",
-      "summary": "Ejecutas un exploit desde el navegador de la consola (Relapse para 7.00–13.60, UMTX/BD-JB para versiones antiguas) y luego cargas etaHEN, que añade homebrew, FTP y carga de copias. Es temporal: se repite en cada arranque.",
+      "summary": "Relapse (7.00–13.60) encadena un fallo del navegador WebKit con un exploit de kernel. Cuando termina abre un cargador ELF en el puerto 9021, al que envías etaHEN (2.5B), que añade homebrew, FTP, instalador de paquetes y toolbox. En firmwares antiguos (1.00–6.50) se usan los exploits UMTX/IPv6. Es temporal: se repite en cada arranque.",
       "requirements": [
-        "PS5 (original, Slim o Pro) en un firmware compatible: 1.00–13.60",
-        "PC o teléfono para servir la página del exploit o enviar payloads",
-        "Una memoria USB en exFAT (para etaHEN y homebrew)"
+        "PS5 (original, Slim o Pro) con firmware 1.00–13.60, sin actualizar",
+        "PC en la misma red (para servir el exploit y enviar etaHEN)",
+        "Memoria USB en exFAT (opcional, para homebrew y copias)"
       ],
       "steps": [
-        { "title": "Bloquea las actualizaciones", "text": "No conectes la PS5 a internet sin protección. Desactiva las descargas automáticas (Ajustes > Sistema > Software del sistema > Actualización automática) y, si puedes, usa un DNS que bloquee los servidores de actualización de Sony." },
-        { "title": "Comprueba tu firmware", "text": "Ajustes > Sistema > Software del sistema > Información de la consola. Usa esta app para ver qué método te corresponde." },
-        { "title": "Descarga las herramientas", "text": "Descarga Relapse (o el exploit de tu rango) y etaHEN solo desde sus GitHub oficiales. Lee el README de la versión que bajes: los pasos exactos cambian entre versiones." },
-        { "title": "Sirve el exploit", "text": "Según el README: ejecuta el servidor local en tu PC o usa el host que recomienda el proyecto. En la PS5, abre el navegador (por ejemplo a través de la Guía del usuario) apuntando a esa dirección." },
-        { "title": "Carga etaHEN", "text": "Cuando el exploit termina (notificación en pantalla), envía o carga el payload de etaHEN. Aparecerá su menú y la notificación de etaHEN." },
-        { "title": "Cada arranque", "text": "Al apagar la consola se pierde el jailbreak: repite los pasos 4 y 5. El modo reposo lo conserva." }
+        { "title": "Bloquea las actualizaciones", "text": "Desactiva Ajustes > Sistema > Software del sistema > Actualización automática. No conectes la consola a internet sin un DNS que bloquee los servidores de actualización de Sony." },
+        { "title": "Comprueba tu firmware", "text": "Ajustes > Sistema > Software del sistema > Información de la consola. 7.00–13.60: Relapse. 1.00–6.50: exploits UMTX/IPv6 (los enlaza el README de etaHEN)." },
+        { "title": "Descarga las herramientas oficiales", "text": "Relapse desde github.com/ntfargo/Relapse-Exploit y etaHEN desde github.com/etaHEN/etaHEN. Lee el README de cada uno: los pasos cambian entre versiones." },
+        { "title": "Lanza el exploit", "text": "Sirve la página de Relapse desde tu PC (según el README) y ábrela en el navegador de la PS5. Si el navegador se queda parado, recarga; si el kernel se cuelga, reinicia y vuelve a intentarlo." },
+        { "title": "Envía etaHEN", "text": "Con el exploit terminado, envía etaHEN-2.5B.bin al puerto 9021 de la IP de la consola (con el script send_payload.ps1 de etaHEN o cualquier enviador de payloads). Aparecerá la notificación de etaHEN y su toolbox en Ajustes." },
+        { "title": "Cada arranque", "text": "Al apagar se pierde. El modo reposo lo conserva; si no, repite los pasos 4 y 5." }
       ],
       "warnings": [
-        "Sin acceso a PSN mientras uses firmware antiguo y no te conectes con homebrew activo: riesgo de baneo.",
-        "Ignora vídeos que prometen jailbreak en 14.xx: no hay nada público verificado."
+        "No inicies sesión en PSN con homebrew activo: riesgo de baneo. La 14.10+ exige firmware mínimo para PSN.",
+        "No hay jailbreak público para 14.00 o superior: ignora vídeos que lo prometan."
       ],
       "links": [
         { "title": "Relapse (GitHub)", "url": "https://github.com/ntfargo/Relapse-Exploit" },
-        { "title": "Hilo en GBAtemp", "url": "https://gbatemp.net/threads/relapse-ps5-kernel-exploit-brings-homebrew-to-firmware-7-00-13-60.684829/" }
+        { "title": "etaHEN (GitHub)", "url": "https://github.com/etaHEN/etaHEN" },
+        { "title": "Hilo de Relapse en GBAtemp", "url": "https://gbatemp.net/threads/relapse-ps5-kernel-exploit-brings-homebrew-to-firmware-7-00-13-60.684829/" }
       ]
     },
     {
       "id": "ps4-pppwn",
-      "title": "PS4 9.03–11.00: GoldHEN con PPPwn",
+      "title": "PS4 7.00–11.00: GoldHEN con PPPwn",
       "consoleIds": ["ps4"],
       "difficulty": "media",
       "time": "30 min",
-      "summary": "PPPwn aprovecha un fallo en la conexión PPPoE. Conectas la PS4 por cable a un PC (o Raspberry Pi/router compatible) que ejecuta PPPwn, y al 'probar la conexión' se carga GoldHEN desde un USB.",
+      "summary": "PPPwn aprovecha un fallo de la conexión PPPoE. Conectas la PS4 por cable a un PC, Raspberry Pi o router que ejecuta pppwn_cpp, y al probar la conexión se carga GoldHEN desde un USB.",
       "requirements": [
         "PS4 con firmware 7.00–11.00",
         "Cable Ethernet",
-        "PC (Windows/Linux/Mac), Raspberry Pi o router compatible con pppwn_cpp",
-        "Memoria USB en FAT32 o exFAT con el archivo goldhen.bin en la raíz"
+        "PC (Windows, macOS o Linux), Raspberry Pi o router compatible",
+        "pppwn_cpp y los archivos stage1/stage2 de tu firmware exacto",
+        "Memoria USB en FAT32/exFAT con goldhen.bin en la raíz"
       ],
       "steps": [
-        { "title": "Prepara el USB", "text": "Descarga GoldHEN desde su GitHub oficial y copia goldhen.bin en la raíz del USB. Conéctalo a la PS4." },
-        { "title": "Prepara PPPwn", "text": "Descarga pppwn_cpp (o PPPwn) desde GitHub y los archivos stage1/stage2 de tu firmware exacto. En el PC, identifica la interfaz de red del cable." },
-        { "title": "Conecta el cable", "text": "Une la PS4 y el PC directamente con el cable Ethernet." },
-        { "title": "Configura la red en la PS4", "text": "Ajustes > Red > Configurar conexión a Internet > Usar un cable LAN > Personalizada > PPPoE. Escribe cualquier usuario y contraseña (por ejemplo 'ppp'). Elige 'No usar' proxy." },
-        { "title": "Ejecuta PPPwn", "text": "En el PC lanza pppwn con tu interfaz y firmware, por ejemplo: pppwn --interface eth0 --fw 1100. Luego, en la PS4, pulsa 'Probar conexión a Internet'." },
-        { "title": "Espera a 'PPPwned'", "text": "Si sale bien, el PC muestra [+] PPPwned y la PS4 muestra la notificación de GoldHEN. Si falla, reinicia la PS4 y vuelve a intentarlo (puede tardar varios intentos)." },
-        { "title": "Cada arranque", "text": "Al apagar la consola se pierde: repite el paso 5. Usa el modo reposo para conservarlo." }
+        { "title": "Prepara el USB", "text": "Descarga GoldHEN de su página oficial y copia goldhen.bin en la raíz del USB. Conéctalo a la PS4." },
+        { "title": "Prepara pppwn_cpp", "text": "Descarga pppwn_cpp desde su GitHub y los stage1.bin/stage2.bin de tu firmware (el stage2 de GoldHEN). Ejecuta 'pppwn list' para ver el nombre de la interfaz de red del cable." },
+        { "title": "Configura la red de la PS4", "text": "Une la PS4 y el PC con el cable. En la PS4: Ajustes > Red > Configurar conexión a Internet > Usar un cable LAN > Personalizada > PPPoE. Usuario y contraseña: cualquiera (por ejemplo 'ppp'). Proxy: No usar." },
+        { "title": "Ejecuta PPPwn", "text": "En el PC: pppwn --interface TU_INTERFAZ --fw 1100 --stage1 stage1.bin --stage2 stage2.bin --auto-retry (cambia 1100 por tu firmware, p. ej. 900). Después pulsa 'Probar conexión a Internet' en la PS4." },
+        { "title": "Espera a 'PPPwned'", "text": "Puede tardar varios intentos. Al terminar verás [+] PPPwned en el PC y la notificación de GoldHEN en la PS4 (FTP en el puerto 2121, BinLoader en el 9090)." },
+        { "title": "Cada arranque", "text": "Es temporal: tras apagar, repite el paso 4. El modo reposo lo conserva." }
       ],
-      "warnings": ["No actualices el firmware: Sony cerró PPPwn en versiones posteriores."],
+      "warnings": [
+        "No actualices el firmware: Sony cerró PPPwn después de la 11.00.",
+        "No uses PSN con homebrew activo."
+      ],
       "links": [
-        { "title": "GoldHEN (GitHub)", "url": "https://github.com/GoldHEN/GoldHEN" },
-        { "title": "PPPwn (GitHub)", "url": "https://github.com/TheOfficialFloW/PPPwn" },
-        { "title": "pppwn_cpp (GitHub)", "url": "https://github.com/xfangfang/PPPwn_cpp" }
+        { "title": "pppwn_cpp (GitHub)", "url": "https://github.com/xfangfang/PPPwn_cpp" },
+        { "title": "PPPwn original (GitHub)", "url": "https://github.com/TheOfficialFloW/PPPwn" },
+        { "title": "GoldHEN (GitHub)", "url": "https://github.com/GoldHEN/GoldHEN" }
       ]
     },
     {
       "id": "ps4-goldhen",
-      "title": "PS4: GoldHEN desde el navegador",
+      "title": "PS4: exploit por navegador + GoldHEN",
       "consoleIds": ["ps4"],
       "difficulty": "facil",
       "time": "20 min",
-      "summary": "En 5.05–9.00 y en 12.50–13.52 se puede lanzar el exploit desde el navegador de la PS4 (a través de la Guía del usuario o un host local) y cargar GoldHEN. En 11.02–12.02 se usa Lapse. Si tu firmware es más antiguo, puedes actualizar manualmente a una versión compatible.",
+      "summary": "En 5.05, 6.72, 7.xx, 9.00 y en 12.50–13.52 (exploit Bagagwa) se lanza el exploit desde el navegador de la consola, normalmente desde la Guía del usuario apuntando el DNS a un host. En 11.02–12.02 se usa el kernel exploit Lapse. Después se carga GoldHEN (o el payload que soporte tu versión).",
       "requirements": [
-        "PS4 en un firmware compatible (mira la lista de la app)",
-        "PC o teléfono para servir el host del exploit (recomendado) o un host público de confianza",
-        "Memoria USB en FAT32 o exFAT (opcional, para GoldHEN y homebrew)"
+        "PS4 en un firmware con exploit (consulta la lista de la app)",
+        "PC para servir un host local (recomendado) o un host de confianza",
+        "Memoria USB en FAT32/exFAT (opcional)"
       ],
       "steps": [
-        { "title": "Bloquea las actualizaciones", "text": "Ajustes > Sistema > Descargas automáticas: desactiva 'Archivos de actualización del software del sistema'. No aceptes actualizaciones." },
-        { "title": "Si tu firmware es menor que 5.05", "text": "Descarga el archivo oficial de actualización de Sony de una versión compatible (por ejemplo 9.00), cópialo a USB en PS4/UPDATE/PS4UPDATE.PUP e instálalo en Modo seguro > Actualizar software del sistema. Solo se puede subir de versión, nunca bajar." },
-        { "title": "Prepara el host", "text": "Descarga un host de exploit con GoldHEN para tu firmware desde un repositorio de confianza y ejecútalo en tu PC (o usa la página indicada en la guía oficial). Apunta el DNS de la PS4 al host si el método lo pide." },
-        { "title": "Abre la Guía del usuario", "text": "Ajustes > Guía del usuario / Información útil > Guía del usuario. Con el DNS configurado se abre la página del exploit en lugar de la de Sony." },
-        { "title": "Ejecuta el exploit", "text": "Elige GoldHEN y espera. Si se cuelga, reinicia y prueba de nuevo. Al terminar verás la notificación 'GoldHEN loaded'." },
-        { "title": "Cada arranque", "text": "Es temporal: repite los pasos 4 y 5 tras apagar la consola." }
+        { "title": "Bloquea las actualizaciones", "text": "Ajustes > Sistema > Descargas automáticas: desactiva 'Archivos de actualización del software del sistema'. Nunca aceptes una actualización." },
+        { "title": "Si estás en un firmware antiguo", "text": "En 7.xx–8.xx la guía de GBAtemp recomienda subir a 9.00. Para subir: copia el archivo oficial de Sony en USB:/PS4/UPDATE/PS4UPDATE.PUP e instálalo desde el Modo seguro (opción 3). Solo se puede subir, nunca bajar." },
+        { "title": "Prepara el host", "text": "Usa el host de la AIO PS4 Exploit Guide de GBAtemp (o uno local en tu PC) con el exploit para tu firmware: clásico WebKit + kernel (5.05/6.72/9.00), Lapse (11.02–12.02) o Bagagwa (12.50–13.52)." },
+        { "title": "Abre el exploit", "text": "Configura la red con el DNS que indique el host y abre Ajustes > Guía del usuario: se cargará el menú del exploit en lugar de la página de Sony." },
+        { "title": "Carga GoldHEN", "text": "Elige el exploit y GoldHEN. Si se cuelga, reinicia y prueba otra vez. Verás 'GoldHEN loaded' (FTP en 2121, BinLoader en 9090). Comprueba en el GitHub de GoldHEN qué versiones soporta tu firmware." },
+        { "title": "Cada arranque", "text": "Es temporal: repite los pasos 4 y 5 tras apagar." }
       ],
-      "warnings": ["No inicies sesión en PSN con homebrew activo: riesgo de baneo."],
+      "warnings": [
+        "No inicies sesión en PSN con homebrew activo.",
+        "No hay exploit público para 14.00 o superior."
+      ],
       "links": [
-        { "title": "GoldHEN (GitHub)", "url": "https://github.com/GoldHEN/GoldHEN" },
-        { "title": "Guía GoldHEN 7.00–13.52", "url": "https://doctorglitch.com/ps4-jailbreak-goldhen-firmware-7-00-13-52/" }
+        { "title": "AIO PS4 Exploit Guide (GBAtemp)", "url": "https://gbatemp.net/threads/aio-ps4-exploit-guide.497858/" },
+        { "title": "GoldHEN (GitHub)", "url": "https://github.com/GoldHEN/GoldHEN" }
       ]
     },
     {
       "id": "ps3-cfw",
-      "title": "PS3 compatible: instalar CFW Evilnat",
+      "title": "PS3 compatible: CFW Evilnat",
       "consoleIds": ["ps3"],
       "difficulty": "media",
       "time": "45 min",
-      "summary": "En modelos compatibles con CFW (fábrica 3.55 o menos) se escribe un CFW permanente: actualizas a la última oficial, usas el Flash Writer de Ps3Xploit o PS3HEN para parchear la flash y luego instalas el CFW Evilnat desde USB.",
+      "summary": "En PS3 compatibles con CFW (las que salieron de fábrica con 3.55 o menos) se instala un CFW permanente: primero firmware HFW y PS3HEN desde el navegador, luego el CFW Evilnat desde USB.",
       "requirements": [
-        "PS3 compatible con CFW (compruébalo con el verificador de Ps3Xploit o en la guía)",
-        "Memoria USB en FAT32",
-        "Archivos oficiales: última actualización de Sony y CFW Evilnat de la misma versión"
+        "PS3 compatible con CFW (compruébalo con el verificador de Ps3Xploit / ConsoleMods)",
+        "Memoria USB en FAT32 (MBR)",
+        "Firmware HFW 4.93 (comprueba su MD5) y CFW Evilnat de la misma versión"
       ],
       "steps": [
-        { "title": "Comprueba compatibilidad", "text": "Mira el modelo (CECH-XXXX) y la fecha de fabricación en la etiqueta trasera, y usa el verificador de Ps3Xploit para confirmar que es 'CFW compatible'." },
-        { "title": "Actualiza a la última oficial", "text": "Instala la última actualización oficial de Sony (Ajustes > Actualización del sistema)." },
-        { "title": "Activa HEN o el Flash Writer", "text": "Abre el navegador de la PS3 en la página de Ps3Xploit e instala PS3HEN o ejecuta el Flash Writer siguiendo la guía oficial." },
-        { "title": "Copia el CFW", "text": "Copia el PS3UPDAT.PUP del CFW Evilnat en el USB, dentro de PS3/UPDATE/." },
-        { "title": "Instala el CFW", "text": "Desde HEN, instala el CFW (Ajustes > Actualización del sistema > desde medio de almacenamiento). La consola se reinicia con el CFW permanente." }
+        { "title": "Comprueba compatibilidad", "text": "Mira el modelo (CECH-XXXX) y usa el verificador de compatibilidad. Si no es compatible, usa la guía de PS3HEN: instalar un CFW en un modelo no compatible lo inutiliza." },
+        { "title": "Instala el HFW", "text": "Copia el PS3UPDAT.PUP de HFW en USB:/PS3/UPDATE/ y ve a Ajustes > Actualización del sistema > Actualizar desde medio de almacenamiento." },
+        { "title": "Activa HEN", "text": "Abre el navegador de la PS3 en ps3xploit.me (alternativa: hen.lbpunion.com), borra antes cookies y caché, e instala/activa PS3HEN." },
+        { "title": "Instala el CFW", "text": "Con HEN activo usa el instalador/Flash Writer que indica la guía de ConsoleMods y después instala el PS3UPDAT.PUP de Evilnat desde USB. Al reiniciar tendrás CFW permanente." }
       ],
       "warnings": [
-        "Nunca apagues la consola durante una instalación: puede quedar inutilizada.",
-        "Si tu consola no es compatible, instalar un CFW la estropea: usa HEN."
+        "Nunca apagues la consola durante una instalación de firmware.",
+        "No actives Factory Service Mode ni CCAPI con PS3HEN."
       ],
       "links": [
+        { "title": "PS3 (ConsoleMods)", "url": "https://consolemods.org/wiki/PS3" },
         { "title": "PS3HEN (ConsoleMods)", "url": "https://consolemods.org/wiki/PS3HEN" },
-        { "title": "PS3 (ConsoleMods)", "url": "https://consolemods.org/wiki/PS3" }
+        { "title": "Ps3Xploit", "url": "https://ps3xploit.me/" }
       ]
     },
     {
@@ -210,33 +225,42 @@
       "consoleIds": ["ps3"],
       "difficulty": "facil",
       "time": "20 min",
-      "summary": "PS3HEN se instala desde el navegador en cualquier PS3 con la última versión oficial y permite homebrew. Se activa con un toque en cada arranque.",
-      "requirements": ["PS3 con la última versión oficial", "Conexión a internet en la PS3"],
+      "summary": "PS3HEN funciona en cualquier PS3, incluidas Slim tardías y Super Slim. Se instala el firmware HFW (4.93 o anterior) y HEN desde el navegador; después se activa con un toque en cada arranque.",
+      "requirements": ["Memoria USB en FAT32 (MBR)", "Firmware HFW 4.93 (comprueba el MD5)", "Conexión a internet en la PS3"],
       "steps": [
-        { "title": "Actualiza", "text": "Ajustes > Actualización del sistema: instala la última versión oficial." },
-        { "title": "Abre la página de Ps3Xploit", "text": "En el navegador de la PS3, entra en la página oficial de PS3HEN y sigue sus instrucciones para instalar el paquete inicial." },
-        { "title": "Instala HEN", "text": "Instala PS3HEN desde el icono que aparece en el XMB. Al terminar aparece 'Enable HEN'." },
-        { "title": "Cada arranque", "text": "Pulsa 'Enable HEN' en el XMB después de encender la consola." }
+        { "title": "Mira tu versión", "text": "Ajustes > Ajustes del sistema > Información del sistema. De 4.83 a 4.93 tienes que instalar primero el HFW." },
+        { "title": "Instala el HFW", "text": "Copia el PS3UPDAT.PUP del HFW en USB:/PS3/UPDATE/ y ve a Actualización del sistema > Actualizar desde medio de almacenamiento." },
+        { "title": "Instala HEN", "text": "Borra cookies, caché e historial del navegador, abre ps3xploit.me (o hen.lbpunion.com si no carga) y sigue el instalador. Aparecerá 'Enable HEN' en el XMB." },
+        { "title": "Cada arranque", "text": "Pulsa 'Enable HEN' después de encender. Si se queda en 'Enabling HEN', reinicia y prueba de nuevo." }
       ],
-      "warnings": ["No uses PSN con homebrew activo."],
-      "links": [{ "title": "PS3HEN (ConsoleMods)", "url": "https://consolemods.org/wiki/PS3HEN" }]
+      "warnings": ["No actives Factory Service Mode ni CCAPI con PS3HEN.", "No uses PSN con homebrew activo."],
+      "links": [
+        { "title": "PS3HEN (ConsoleMods)", "url": "https://consolemods.org/wiki/PS3HEN" },
+        { "title": "Ps3Xploit", "url": "https://ps3xploit.me/" }
+      ]
     },
     {
       "id": "vita-henlo",
-      "title": "PS Vita: HENlo + Ensō",
+      "title": "PS Vita: HENlo + VitaDeploy + Ensō",
       "consoleIds": ["vita"],
       "difficulty": "facil",
-      "time": "30 min",
-      "summary": "Con HENlo (desde el navegador) activas HENkaku en cualquier firmware 3.xx, instalas VitaShell y, opcionalmente, Ensō para que el hack sea permanente.",
-      "requirements": ["PS Vita o PS TV (cualquier firmware hasta 3.74)", "Conexión Wi-Fi", "Tarjeta de memoria (Sony o adaptador SD2Vita)"],
+      "time": "40 min",
+      "summary": "La guía oficial actualiza primero a la 3.74, activa HENkaku con HENlo desde el navegador e instala VitaDeploy. Con VitaDeploy se pasa a la 3.65 con Ensō (CFW permanente) en un solo paso.",
+      "requirements": ["PS Vita o PS TV", "Conexión Wi-Fi", "Vita 1000 sin tarjeta de memoria oficial: crear partición interna (lo explica la guía)"],
       "steps": [
-        { "title": "Abre el navegador", "text": "En la Vita abre el navegador y entra en la página de HENlo indicada en la guía oficial (vita.hacks.guide)." },
-        { "title": "Ejecuta HENlo", "text": "Sigue el menú de HENlo para activar HENkaku e instalar VitaDeploy." },
-        { "title": "Instala herramientas", "text": "Desde VitaDeploy instala VitaShell y, si quieres, actualiza o baja a 3.65 con Modoru para instalar Ensō." },
-        { "title": "Hazlo permanente (opcional)", "text": "En 3.60 o 3.65 instala Ensō desde su app: el hack se cargará solo en cada arranque." }
+        { "title": "Consola de segunda mano", "text": "Si no sabes si tuvo CFW, restáurala primero siguiendo 'Restoring System' de la guía." },
+        { "title": "Actualiza a 3.74", "text": "Ajustes > Sistema > Información del sistema. Si tienes de 1.03 a 3.73, actualiza a 3.74 como indica la guía." },
+        { "title": "Lanza HENlo", "text": "En el navegador de la Vita abre http://jailbreak.psp2.dev, pulsa 'Unlock my Vita' y luego 'Unlock'. Aparecerá 'henlo-bootstrap'." },
+        { "title": "Instala HENkaku y VitaDeploy", "text": "Pulsa × en 'Install henkaku', después en 'Install VitaDeploy' y en 'Exit'. Luego Ajustes > HENkaku Settings > marca 'Enable Unsafe Homebrew'." },
+        { "title": "Instala Ensō (permanente)", "text": "Abre VitaDeploy > 'Install a different OS' > 'Quick 3.65 Install' (con internet). Confirma con ×. La consola instala 3.65 con Ensō y reinicia con CFW. Si pregunta transferir datos a la tarjeta de memoria, elige No." },
+        { "title": "Termina", "text": "Sigue 'Finalizing Setup' de la guía para plugins y SD2Vita." }
       ],
-      "warnings": ["Cambiar de firmware con Modoru tiene un pequeño riesgo; sigue la guía al pie de la letra."],
-      "links": [{ "title": "Vita Hacks Guide", "url": "https://vita.hacks.guide/" }]
+      "warnings": ["HENlo no sobrevive al reinicio hasta que instalas Ensō.", "Ensō hace cambios permanentes: no apagues durante la instalación."],
+      "links": [
+        { "title": "Vita Hacks Guide", "url": "https://vita.hacks.guide/" },
+        { "title": "Usar HENlo", "url": "https://vita.hacks.guide/using-henlo" },
+        { "title": "Instalar Ensō", "url": "https://vita.hacks.guide/installing-enso" }
+      ]
     },
     {
       "id": "psp-ark",
@@ -244,33 +268,46 @@
       "consoleIds": ["psp"],
       "difficulty": "facil",
       "time": "20 min",
-      "summary": "Actualizas a la 6.61 oficial, copias ARK en la Memory Stick y lo lanzas desde el menú de Juegos. En modelos 1000/2000 puedes hacerlo permanente.",
-      "requirements": ["PSP (cualquier modelo) con batería cargada", "Memory Stick Pro Duo o microSD con adaptador", "Cable USB"],
+      "summary": "Con la PSP en 6.61 copias ARK y lo lanzas desde el menú Juego. Es temporal hasta que instalas el cIPL, que lo hace permanente. ARK-4 está archivado y su desarrollo sigue en ARK-5.",
+      "requirements": ["PSP (cualquier modelo) en 6.61 con la batería cargada", "Memory Stick Pro Duo o microSD con adaptador", "Cable USB o lector de tarjetas"],
       "steps": [
-        { "title": "Actualiza a 6.61", "text": "Ajustes del sistema > Actualización de red, o copia la actualización oficial 6.61 en PSP/GAME/UPDATE/EBOOT.PBP y ejecútala." },
-        { "title": "Copia ARK", "text": "Descarga ARK-4 (o ARK-5) desde su GitHub. Copia la carpeta ARK_01234 a PSP/SAVEDATA/ y ARK_Loader a PSP/GAME/." },
-        { "title": "Lanza ARK", "text": "En la PSP ve a Juego > Memory Stick y abre 'ARK Loader'. La consola se reinicia con el CFW activo." },
-        { "title": "Hazlo permanente (opcional)", "text": "En PSP 1000 y algunas 2000 usa el instalador cIPL de ARK. En el resto, el método 'Infinity' hace que arranque solo." }
+        { "title": "Actualiza a 6.61", "text": "Ajustes del sistema > Actualización de red, o la actualización oficial copiada en PSP/GAME/UPDATE/EBOOT.PBP." },
+        { "title": "Copia ARK", "text": "Descarga ARK-5 (o ARK-4) desde GitHub. Copia ARK_01234 a /PSP/SAVEDATA/ y ARK_Loader a /PSP/GAME/." },
+        { "title": "Lanza ARK", "text": "En la PSP: Juego > Memory Stick > ARK Loader. La consola reinicia con el CFW (hay que repetirlo tras apagar)." },
+        { "title": "Hazlo permanente", "text": "Copia ARK_cIPL a /PSP/GAME/, ejecútalo y elige instalar el cIPL: el instalador detecta tu modelo." },
+        { "title": "En PS Vita (ePSP)", "text": "Con HENkaku: instala NoPspEmuDrm_mod y FasterARK.vpk con VitaShell, o usa Adrenaline con ARK en pspemu/PSP/SAVEDATA y pspemu/PSP/GAME." }
       ],
-      "warnings": ["No hagas instalaciones permanentes con la batería baja."],
-      "links": [{ "title": "ARK-4 (GitHub)", "url": "https://github.com/PSP-Archive/ARK-4" }]
+      "warnings": ["No instales el cIPL con la batería baja."],
+      "links": [
+        { "title": "ARK-5 (GitHub)", "url": "https://github.com/PSP-Arkfive/ARK-5" },
+        { "title": "ARK-4 (GitHub, archivado)", "url": "https://github.com/PSP-Archive/ARK-4" }
+      ]
     },
     {
       "id": "ps2-fmcb",
       "title": "PS2: FreeMcBoot / OpenTuna + OPL",
       "consoleIds": ["ps2"],
       "difficulty": "facil",
-      "time": "20 min",
-      "summary": "Una memory card con FreeMcBoot u OpenTuna arranca el homebrew al encender la consola. Con Open PS2 Loader cargas las copias de tus juegos desde USB, disco duro o red.",
-      "requirements": ["PS2 (cualquier modelo)", "Memory card con FreeMcBoot/OpenTuna (comprada ya preparada o instalada con FreeDVDBoot)", "USB, disco duro (modelos fat) o PC en red"],
-      "steps": [
-        { "title": "Consigue la memory card", "text": "La forma más fácil es comprar una memory card con FMCB/OpenTuna ya instalado. Si no, graba FreeDVDBoot en un DVD (modelos slim) para instalarlo tú." },
-        { "title": "Arranca", "text": "Inserta la tarjeta y enciende: aparece el menú de FreeMcBoot/OpenTuna." },
-        { "title": "Instala OPL", "text": "Copia Open PS2 Loader (OPL) a la memory card o a USB y lánzalo desde el menú." },
-        { "title": "Añade tus juegos", "text": "Copia tus copias de seguridad en formato ISO a la carpeta DVD del USB (exFAT/FAT32) o del disco duro, y ábrelas desde OPL." }
+      "time": "20–40 min",
+      "summary": "Una memory card con FreeMcBoot (FMCB) u OpenTuna arranca el homebrew al encender. FMCB funciona en todos los modelos salvo las Slim SCPH-9000x con BIOS 2.30/2.50 (y la PS2 TV), que usan OpenTuna. En Slim se puede instalar sin chip con FreeDVDBoot. Open PS2 Loader carga tus copias desde USB, disco duro o red.",
+      "requirements": [
+        "PS2 y una memory card (mejor original de Sony)",
+        "Memory card ya preparada o un DVD grabado con FreeDVDBoot (Slim y algunos Fat)",
+        "USB, disco duro (modelos Fat con adaptador de red) o PC en red para los juegos"
       ],
-      "warnings": ["Las PS2 slim SCPH-9000x más recientes necesitan OpenTuna en lugar de FreeMcBoot."],
-      "links": [{ "title": "Open PS2 Loader (GitHub)", "url": "https://github.com/ps2homebrew/Open-PS2-Loader" }]
+      "steps": [
+        { "title": "Mira tu modelo", "text": "SCPH-9000x (última Slim): necesitas OpenTuna. Resto de modelos: FreeMcBoot. Consulta la lista de la PS2 Developer Wiki / ConsoleMods." },
+        { "title": "Consigue el exploit", "text": "Lo más fácil es comprar una memory card con FMCB/OpenTuna ya instalada. Si no, graba la ISO de FreeDVDBoot para la versión de tu reproductor DVD y lánzala para instalar FMCB/OpenTuna en tu tarjeta." },
+        { "title": "Arranca", "text": "Inserta la tarjeta y enciende: aparece el menú de FreeMcBoot/OpenTuna." },
+        { "title": "Instala OPL", "text": "Copia Open PS2 Loader a la memory card o a USB y ábrelo desde el menú." },
+        { "title": "Añade tus juegos", "text": "Pon tus copias en formato ISO en la carpeta DVD (o CD) del USB o disco duro y ábrelas desde OPL." }
+      ],
+      "warnings": ["Si tu reproductor DVD no es compatible con FreeDVDBoot, existe la alternativa YADE (Yet Another DVD Exploit)."],
+      "links": [
+        { "title": "FreeMcBoot (ConsoleMods)", "url": "https://consolemods.org/wiki/PS2:FMCB" },
+        { "title": "FreeDVDBoot (ConsoleMods)", "url": "https://consolemods.org/wiki/PS2:FreeDVDBoot" },
+        { "title": "Open PS2 Loader (GitHub)", "url": "https://github.com/ps2homebrew/Open-PS2-Loader" }
+      ]
     },
     {
       "id": "n3ds-mset9",
@@ -278,17 +315,23 @@
       "consoleIds": ["n3ds"],
       "difficulty": "facil",
       "time": "1 hora",
-      "summary": "MSET9 solo necesita la tarjeta SD y un PC. Con él instalas boot9strap y Luma3DS, un CFW permanente.",
-      "requirements": ["3DS, 2DS, New 3DS o New 2DS XL con firmware 11.4 o superior", "Tarjeta SD/microSD", "PC con Python"],
+      "summary": "MSET9 solo necesita la tarjeta SD y un PC (o teléfono Android/iPhone con su versión). Instala boot9strap y Luma3DS, un CFW permanente, y después un script hace las copias de seguridad e instala las apps básicas.",
+      "requirements": ["3DS, 2DS, New 3DS o New 2DS XL", "Tarjeta SD/microSD", "PC con Python 3 (no la versión de Microsoft Store) o la app MSET9 para Android/iOS"],
       "steps": [
-        { "title": "Prepara la SD", "text": "Sigue la sección 'Section I - Prep Work' de 3ds.hacks.guide y copia en la SD los archivos que indica." },
-        { "title": "Ejecuta MSET9", "text": "Ejecuta el script MSET9 en el PC con la SD conectada y sigue exactamente sus instrucciones: te dirá qué abrir en la Configuración de la consola para lanzar el exploit." },
-        { "title": "Instala boot9strap", "text": "Desde SafeB9SInstaller instala boot9strap. Tras reiniciar se carga Luma3DS." },
-        { "title": "Termina la configuración", "text": "Sigue 'Finalizing Setup' de la guía: instala el Homebrew Launcher, FBI y haz copia de seguridad de la NAND." },
-        { "title": "Limpia MSET9", "text": "Vuelve a ejecutar el script y elige la opción para eliminar MSET9 de la SD." }
+        { "title": "Prepara la SD", "text": "Descarga el último MSET9 de la página de releases de hacks-guide en GitHub y copia todo el contenido del zip en la raíz de la SD." },
+        { "title": "Crea el ID1 trucado", "text": "Ejecuta el script (MSET9-Windows, MSET9-macOS.command o python3 mset9.py), elige tu modelo y la opción 1. Tus datos parecerán desaparecer: es normal." },
+        { "title": "Prepara la consola", "text": "Con la SD dentro, abre Mii Maker y sal. Luego Configuración de la consola > Gestión de datos > Nintendo 3DS > Software > Restablecer (no borra nada). Apaga, vuelve a ejecutar el script y comprueba que pone 'Ready'." },
+        { "title": "Lanza MSET9", "text": "Enciende en Configuración de la consola > Gestión de datos > Nintendo 3DS > Datos extra. Sin tocar nada, saca la SD, ejecuta el script con la opción 3 ('Inject') y vuelve a meter la SD: se abre SafeB9SInstaller." },
+        { "title": "Instala boot9strap", "text": "Introduce la combinación de botones que muestra la pantalla, espera a que los siete pasos salgan en verde y pulsa A. En el menú de Luma3DS pulsa Start para guardar." },
+        { "title": "Quita MSET9 (obligatorio)", "text": "Con la SD en el PC, ejecuta el script: opción 4 (si pone Injected) y luego opción 5 ('Successfully removed MSET9!')." },
+        { "title": "Finalizing Setup", "text": "Copia finalize.romfs a la raíz y x_finalize_helper.firm a luma/payloads. Arranca manteniendo X y ejecuta el script 'finalize' en GodMode9: instala FBI, Universal-Updater, Checkpoint, Anemone3DS y ftpd, y crea las copias (NAND y essential.exefs). Guarda /gm9/backups/ en varios sitios." }
       ],
-      "warnings": ["Sigue la guía en orden; saltarse pasos puede dejar la consola sin arrancar."],
-      "links": [{ "title": "3DS Hacks Guide", "url": "https://3ds.hacks.guide/" }]
+      "warnings": ["Sigue el orden de la guía; si sale una pantalla roja o se congela más de 10 segundos, ve a Troubleshooting."],
+      "links": [
+        { "title": "3DS Hacks Guide", "url": "https://3ds.hacks.guide/" },
+        { "title": "MSET9 (PC)", "url": "https://3ds.hacks.guide/installing-boot9strap-(mset9-cli).html" },
+        { "title": "Finalizing Setup", "url": "https://3ds.hacks.guide/finalizing-setup.html" }
+      ]
     },
     {
       "id": "wiiu-aroma",
@@ -296,67 +339,91 @@
       "consoleIds": ["wiiu"],
       "difficulty": "facil",
       "time": "40 min",
-      "summary": "Con un exploit del navegador (o UDPIH por USB) instalas Tiramisu/Aroma, el entorno de homebrew permanente de la Wii U.",
-      "requirements": ["Wii U (cualquier versión hasta la 5.5.6)", "Tarjeta SD en FAT32", "Conexión a internet en la Wii U"],
+      "summary": "Con el exploit del navegador (wiiuexploit.xyz) cargas Aroma desde la SD, haces copia de la NAND e instalas PayloadLoader en la app 'Información sobre salud y seguridad'. Después lo configuras para que Aroma arranque solo.",
+      "requirements": ["Wii U con firmware 5.5.6 (Norteamérica) / 5.5.5 (otras regiones) o inferior", "Tarjeta SD en FAT32 (32 GB basta)", "Wii U conectada a internet", "Desinstalar antes CFW antiguos (CBHC, Haxchi, Indexiine) si los tienes"],
       "steps": [
-        { "title": "Prepara la SD", "text": "Descarga Aroma desde aroma.foryour.cafe con los extras recomendados y copia todo en la raíz de la SD." },
-        { "title": "Lanza el exploit", "text": "En la Wii U abre el navegador e ingresa la dirección del exploit que indica wiiu.hacks.guide, o usa UDPIH si tu guía lo recomienda." },
-        { "title": "Abre el instalador", "text": "Se abre el Environment Loader. Ejecuta el instalador y elige hacerlo permanente (Aroma con payload.elf en el sistema)." },
-        { "title": "Listo", "text": "Ahora Aroma se carga al encender. Mantén pulsado el botón indicado en el arranque para entrar al menú de opciones." }
+        { "title": "Prepara la SD", "text": "En aroma.foryour.cafe marca las opciones, pulsa 'Download Payloads' y 'Download Base Aroma'. Formatea la SD en FAT32 (GUIFormat, 32 KB de unidad de asignación) y copia la carpeta wiiu de ambos zip a la raíz, fusionándolas." },
+        { "title": "Exploit del navegador", "text": "Abre el navegador de la Wii U en wiiuexploit.xyz, pulsa 'Run Exploit!' y mantén B unos 20 segundos hasta que salga el menú." },
+        { "title": "Copia de la NAND", "text": "Sigue 'Making a NAND Backup' de la guía antes de modificar el sistema." },
+        { "title": "Instala PayloadLoader", "text": "Repite el exploit manteniendo X: se abre el Environment Loader. Elige aroma (pulsa X para bloquear actualizaciones), entra al menú de Wii U, abre 'PayloadLoader Installer' e instálalo sobre Información sobre salud y seguridad." },
+        { "title": "Arranque automático", "text": "Abre Salud y seguridad > aroma > PayloadLoader Installer > Boot options > 'Switch to PayloadLoader'. Luego, en el Environment Loader pulsa Y sobre aroma (predeterminado) y en el Boot Selector pulsa Y sobre 'Wii U Menu'." },
+        { "title": "Listo", "text": "Aroma carga en cada arranque. Mantén X al encender para el Environment Loader y START (+) para el Boot Selector." }
       ],
-      "warnings": ["Haz copia de seguridad de la NAND con Dumpling o el método de la guía antes de modificar el sistema."],
-      "links": [{ "title": "Wii U Hacks Guide", "url": "https://wiiu.hacks.guide/" }]
+      "warnings": ["Mantén la consola enchufada durante todo el proceso."],
+      "links": [
+        { "title": "Wii U Hacks Guide", "url": "https://wiiu.hacks.guide/" },
+        { "title": "Aroma (descargas)", "url": "https://aroma.foryour.cafe/" }
+      ]
     },
     {
       "id": "wii-letterbomb",
-      "title": "Wii: LetterBomb + Homebrew Channel",
+      "title": "Wii: Wilbrand / str2hax + Homebrew Channel",
       "consoleIds": ["wii"],
       "difficulty": "facil",
-      "time": "20 min",
-      "summary": "LetterBomb usa un mensaje del Tablón de Wii para lanzar el instalador HackMii, que instala el Homebrew Channel y BootMii.",
-      "requirements": ["Wii con firmware 4.3 (o usa Bluebomb en Wii mini / otras versiones)", "Tarjeta SD de 2 GB o SDHC hasta 32 GB en FAT32"],
-      "steps": [
-        { "title": "Anota tu dirección MAC", "text": "Ajustes de Wii > Internet > Información de la consola: apunta la dirección MAC." },
-        { "title": "Genera LetterBomb", "text": "En please.hackmii.com elige tu región, escribe la MAC, marca 'Bundle the HackMii Installer' y descarga el ZIP. Copia su contenido en la raíz de la SD." },
-        { "title": "Abre la carta", "text": "Mete la SD, abre el Tablón de Wii y busca el sobre rojo (de ayer o de hoy). Ábrelo." },
-        { "title": "Instala", "text": "En el instalador HackMii instala el Homebrew Channel y BootMii (como boot2 si te lo permite, o como IOS)." },
-        { "title": "Copia de seguridad", "text": "Desde BootMii haz una copia de la NAND y guárdala en el PC. Instala también Priiloader como protección." }
+      "time": "30–60 min",
+      "summary": "La guía actual recomienda Wilbrand si puedes usar la tarjeta SD, str2hax si no, y Bluebomb para la Wii mini. Todos abren el instalador HackMii, que instala el Homebrew Channel y BootMii. Después se hace copia de la NAND y se instala Priiloader.",
+      "requirements": [
+        "Wii con menú 3.0 o superior (Wilbrand) o con internet (str2hax)",
+        "Tarjeta SD en FAT32 (en menús anteriores a 4.0, de 2 GB o menos)",
+        "Wii mini: Bluebomb, memoria USB y PC (la guía lo explica aparte)"
       ],
-      "warnings": ["Wii mini no tiene ranura SD: usa Bluebomb con un USB y un PC con Linux."],
-      "links": [{ "title": "Wii Hacks Guide", "url": "https://wii.hacks.guide/" }]
+      "steps": [
+        { "title": "Datos de tu Wii", "text": "Ajustes de Wii: anota la versión y su letra de región (arriba a la derecha) y en Internet > Información de la consola la dirección MAC. Comprueba que la fecha es correcta." },
+        { "title": "Opción A – Wilbrand (con SD)", "text": "En wilbrand.donut.eu.org escribe MAC, versión y región, marca 'Bundle the HackMii Installer for me!' y descarga el zip. Copia la carpeta private y boot.elf a la raíz de la SD y métela en la ranura frontal." },
+        { "title": "Lanza Wilbrand", "text": "Abre el Tablón de Wii y abre la carta verde con una bomba (si no está, mira el día anterior o siguiente). Se abrirá el instalador HackMii." },
+        { "title": "Opción B – str2hax (sin SD)", "text": "Ajustes de Wii > Internet > Configuración de conexión > tu conexión > Cambiar ajustes > DNS automático: No > DNS primario 3.143.163.250. Guarda, haz la prueba (elige No a actualizar) y abre Internet > Contrato de usuario > Sí > Siguiente. Espera 1–2 minutos sin pulsar nada." },
+        { "title": "Instala el Homebrew Channel", "text": "En HackMii instala el Homebrew Channel y BootMii (como boot2 si te lo permite, si no como IOS)." },
+        { "title": "Protege tu Wii", "text": "Desde BootMii haz la copia de la NAND y guárdala en el PC. Instala Priiloader como indica la guía." }
+      ],
+      "warnings": ["Usa la ranura SD frontal: un adaptador USB-SD no sirve.", "Si vuelves al menú al abrir la carta, quita el bloqueo de escritura de la SD."],
+      "links": [
+        { "title": "Wii Hacks Guide", "url": "https://wii.hacks.guide/get-started" },
+        { "title": "Wilbrand", "url": "https://wii.hacks.guide/wilbrand" },
+        { "title": "str2hax", "url": "https://wii.hacks.guide/str2hax" }
+      ]
     },
     {
       "id": "dsi-unlaunch",
       "title": "DS / DSi: flashcard o Memory Pit + Unlaunch",
       "consoleIds": ["nds"],
       "difficulty": "facil",
-      "time": "20 min",
-      "summary": "En DS y DS Lite basta una flashcard. En DSi usas Memory Pit (exploit de la cámara) para instalar Unlaunch y TWiLight Menu++.",
-      "requirements": ["DS/DS Lite: una flashcard tipo R4 y microSD", "DSi/DSi XL: tarjeta SD", "PC para copiar archivos"],
+      "time": "30 min",
+      "summary": "En DS y DS Lite basta una flashcard. En DSi, Memory Pit (exploit de la cámara, compatible con todos los firmwares) lanza dumpTool para copiar la NAND y después se instala Unlaunch y TWiLight Menu++.",
+      "requirements": ["DS/DS Lite: flashcard tipo R4 y microSD", "DSi/DSi XL: tarjeta SD de buena marca", "PC con 7-Zip (Windows) o The Unarchiver (macOS)"],
       "steps": [
-        { "title": "DS y DS Lite", "text": "Formatea la microSD, copia el sistema de tu flashcard (o TWiLight Menu++) y tus copias de seguridad. Inserta la flashcard y arranca." },
-        { "title": "DSi: prepara la SD", "text": "Sigue dsi.cfw.guide: copia en la SD los archivos de Memory Pit correspondientes a tu versión." },
-        { "title": "DSi: lanza Memory Pit", "text": "Abre la Cámara de Nintendo DSi y entra en el álbum de la SD. Se lanza el exploit." },
-        { "title": "DSi: instala Unlaunch", "text": "Desde el menú, haz copia de la NAND con dumpTool y luego instala Unlaunch y TWiLight Menu++." }
+        { "title": "DS y DS Lite", "text": "Formatea la microSD, copia el sistema de tu flashcard (o TWiLight Menu++) y tus copias de seguridad, e inserta la flashcard." },
+        { "title": "DSi: prepara la SD", "text": "Formatea la SD como indica la guía y copia dumpTool como boot.nds en la raíz. Enciende manteniendo A + B: si aparece 'Nocash Unlaunch.dsi', ya tiene Unlaunch." },
+        { "title": "Mira tu versión de la cámara", "text": "Abre la Cámara de Nintendo DSi > álbum (botón grande derecho). Fíjate si hay un icono de Facebook." },
+        { "title": "Copia Memory Pit", "text": "En la cámara toca el icono de la SD para crear sd:/private/ds/app/484E494A/. En el PC renombra pit.bin a tip.bin y pon el pit.bin correcto: 768_1024 si tenías icono de Facebook, 256 si no." },
+        { "title": "Lanza el exploit", "text": "Abre la Cámara, toca el icono de la SD y abre el álbum. La pantalla parpadea en magenta y se abre dumpTool: haz la copia de la NAND y guárdala en el PC." },
+        { "title": "Instala Unlaunch y TWiLight Menu++", "text": "Sigue 'Installing Unlaunch' y 'Choosing a Menu' de la guía." }
       ],
-      "warnings": ["Guarda la copia de la NAND de la DSi en tu PC antes de instalar Unlaunch."],
-      "links": [{ "title": "DSi Guide", "url": "https://dsi.cfw.guide/" }]
+      "warnings": ["Hacer fotos con Memory Pit en la SD rompe el exploit: vuelve a copiarlo.", "El único riesgo de brick es al instalar Unlaunch (mínimo): guarda antes la copia de la NAND."],
+      "links": [
+        { "title": "DSi Guide", "url": "https://dsi.cfw.guide/" },
+        { "title": "Lanzar el exploit", "url": "https://dsi.cfw.guide/launching-the-exploit.html" }
+      ]
     },
     {
       "id": "gamecube-swiss",
-      "title": "GameCube: Swiss",
+      "title": "GameCube: PicoBoot + Swiss",
       "consoleIds": ["gamecube"],
       "difficulty": "media",
-      "time": "30 min (sin soldar) – 1 hora",
-      "summary": "Swiss es el cargador de homebrew y copias. Se arranca con PicoBoot (chip que se instala sin soldar en algunos modelos), con un adaptador SD2SP2 o con exploits de juegos.",
-      "requirements": ["GameCube", "PicoBoot o un método de arranque", "Adaptador SD2SP2 o tarjeta SD Gecko", "Tarjeta SD/microSD"],
+      "time": "1 hora",
+      "summary": "PicoBoot es un modchip con una Raspberry Pi Pico que sustituye la BIOS y arranca Swiss, el cargador de homebrew y copias. Se sueldan solo 5 cables. Swiss se guarda en la SD (adaptador SD2SP2 o SD Gecko) con el nombre ipl.dol.",
+      "requirements": ["GameCube DOL-001 (la DOL-101 no tiene puerto serie y necesita SD Gecko)", "Raspberry Pi Pico con firmware PicoBoot y cables cortos", "Adaptador SD2SP2 o SD Gecko y una SD en FAT32"],
       "steps": [
-        { "title": "Elige cómo arrancar", "text": "PicoBoot (una Raspberry Pi Pico soldada a la placa con unos pocos cables) es lo más cómodo: arranca Swiss siempre. Sin abrir la consola puedes usar exploits de juegos con una SD Gecko." },
-        { "title": "Prepara la SD", "text": "Copia Swiss (y el ipl.dol si usas PicoBoot) en la SD siguiendo su guía." },
-        { "title": "Arranca Swiss", "text": "Enciende la consola: se carga Swiss y desde él puedes abrir homebrew o tus copias de seguridad." }
+        { "title": "Flashea la Pico", "text": "Descarga el firmware de PicoBoot desde su GitHub y cópialo a la Pico (conectándola al PC con BOOTSEL pulsado)." },
+        { "title": "Suelda los 5 cables", "text": "Abre la consola y suelda la Pico según el diagrama de tu placa. Usa cables cortos: los largos hacen que arranque el menú normal." },
+        { "title": "Prepara la SD", "text": "Descarga Swiss, renombra swiss_rXXXX.dol a ipl.dol y cópialo en la raíz de la SD (FAT32)." },
+        { "title": "Arranca", "text": "Con la SD en el SD2SP2 o SD Gecko, enciende: se carga Swiss y desde él abres homebrew o tus copias de seguridad." },
+        { "title": "Volver a Swiss desde un juego", "text": "Copia Swiss también como igr.dol y activa el 'In-Game Reset' en la configuración de Swiss." }
       ],
-      "warnings": ["Instalar PicoBoot implica abrir la consola y soldar."],
-      "links": [{ "title": "Swiss (GitHub)", "url": "https://github.com/emukidid/swiss-gc" }]
+      "warnings": ["Requiere abrir la consola y soldar."],
+      "links": [
+        { "title": "Swiss (GitHub)", "url": "https://github.com/emukidid/swiss-gc" },
+        { "title": "PicoBoot (GitHub)", "url": "https://github.com/webhdx/PicoBoot" }
+      ]
     },
     {
       "id": "x360-badupdate",
@@ -364,35 +431,40 @@
       "consoleIds": ["x360"],
       "difficulty": "media",
       "time": "30 min (BadUpdate) / horas (RGH)",
-      "summary": "BadUpdate es un exploit de software temporal que funciona con el último dashboard. Para un hack permanente se usa RGH 3.0, que requiere soldar.",
-      "requirements": ["Xbox 360 con el dashboard 17559", "Memoria USB", "Uno de los juegos que usa BadUpdate (Rock Band Blitz o la demo indicada en su guía)"],
+      "summary": "BadUpdate es un exploit de software temporal para el dashboard 17559 que parchea el hipervisor y ejecuta un default.xex sin firmar (por ejemplo un lanzador como FreeMyXe). Se repite en cada arranque. Para algo permanente se usa RGH 3.0, con soldadura.",
+      "requirements": ["Xbox 360 con dashboard 17559", "Rock Band Blitz (demo o completo); Tony Hawk's American Wasteland está obsoleto", "Memoria USB en FAT32", "Un default.xex sin firmar (la wiki explica cómo)"],
       "steps": [
-        { "title": "Descarga BadUpdate", "text": "Descarga la última versión desde el GitHub de BadUpdate y cópiala en el USB según su README." },
-        { "title": "Inicia el juego", "text": "Con el USB conectado, inicia el juego indicado y sigue las instrucciones: el exploit puede tardar varios intentos." },
-        { "title": "Carga homebrew", "text": "Cuando BadUpdate termina, el hipervisor queda parcheado y puedes lanzar XeXMenu, Aurora o FreeMyXe." },
-        { "title": "Hack permanente (opcional)", "text": "Para no repetirlo, instala RGH 3.0 (necesitas leer la NAND con una Pico y soldar 1–2 cables) o lleva la consola a un técnico." }
+        { "title": "Prepara el USB", "text": "Descarga Xbox360BadUpdate-Retail-USB.zip de la página de releases, formatea el USB en FAT32 y copia el contenido de la carpeta de tu juego a la raíz (deben quedar BadUpdatePayload y Content)." },
+        { "title": "Pon tu payload", "text": "Copia tu default.xex en la carpeta BadUpdatePayload, sustituyendo el que haya." },
+        { "title": "Lanza el exploit", "text": "Conecta el USB, enciende, inicia sesión en el jugador 1 (o sin sesión en Rock Band Blitz), abre el juego y sigue sus instrucciones para cargar la partida hackeada." },
+        { "title": "Espera al anillo verde", "text": "El anillo de luz indica el progreso. Cuando se pone todo verde se ejecuta tu default.xex. Si falla, reinicia y repite." },
+        { "title": "Hack permanente (opcional)", "text": "BadUpdate no se puede hacer permanente. Para eso está RGH 3.0 (leer la NAND con una Pico y soldar 1–2 cables) o un técnico." }
       ],
-      "warnings": ["No te conectes a Xbox Live con la consola modificada."],
+      "warnings": ["El proyecto está archivado (ya no recibe cambios).", "No te conectes a Xbox Live con la consola modificada."],
       "links": [
         { "title": "BadUpdate (GitHub)", "url": "https://github.com/grimdoomer/Xbox360BadUpdate" },
-        { "title": "ConsoleMods Xbox 360", "url": "https://consolemods.org/wiki/Xbox_360" }
+        { "title": "Cómo usarlo (wiki)", "url": "https://github.com/grimdoomer/Xbox360BadUpdate/wiki/How-To-Use" },
+        { "title": "Xbox 360 (ConsoleMods)", "url": "https://consolemods.org/wiki/Xbox_360" }
       ]
     },
     {
       "id": "xbox-softmod",
-      "title": "Xbox original: softmod ENDGAME",
+      "title": "Xbox original: softmod con ENDGAME",
       "consoleIds": ["xbox"],
       "difficulty": "facil",
       "time": "30 min",
-      "summary": "ENDGAME es un exploit del dashboard que se carga desde una memoria USB (con adaptador al puerto de mando) y no necesita ningún juego.",
-      "requirements": ["Xbox original", "Memoria USB y adaptador USB a puerto de mando de Xbox"],
+      "summary": "ENDGAME es un exploit del dashboard que se carga desde una memoria USB conectada al puerto de mando, sin juego ni lector de DVD. Lanza el Xbox Softmodding Tool de Rocky5, que hace el softmod.",
+      "requirements": ["Xbox original", "Memoria USB (4 GB o menos recomendado)", "Adaptador de USB a puerto de mando de Xbox"],
       "steps": [
-        { "title": "Prepara el USB", "text": "Copia los archivos de ENDGAME y el instalador del softmod de Rocky5 en el USB siguiendo su guía." },
-        { "title": "Lanza el exploit", "text": "Conecta el USB con el adaptador y sigue la guía del softmod de Rocky5 para lanzar el exploit desde el dashboard." },
-        { "title": "Instala el softmod", "text": "Sigue el instalador: hace una copia de tu EEPROM (¡guárdala!) e instala un dashboard como XBMC4Gamers." }
+        { "title": "Prepara el USB", "text": "Descarga el Xbox Softmodding Tool de Rocky5 y extrae Endgame.zip (carpeta Softmod Package): contiene helper, trigger y payload.xbe. Formatea el USB en la Xbox (Memoria) o con FATXplorer en el PC y copia esos elementos a la raíz." },
+        { "title": "Lanza ENDGAME", "text": "Conecta el USB con el adaptador, enciende, entra en Memoria y selecciona el dispositivo. La consola se congela un momento, el LED cambia de color y arranca el instalador." },
+        { "title": "Instala el softmod", "text": "Sigue el instalador de Rocky5. Guarda la copia de la EEPROM que crea en tu PC: sin ella no podrás recuperar el disco duro si algo falla." }
       ],
-      "warnings": ["Guarda la copia de la EEPROM en tu PC: sin ella no podrás recuperar el disco duro si falla."],
-      "links": [{ "title": "Xbox (ConsoleMods)", "url": "https://consolemods.org/wiki/Xbox" }]
+      "warnings": ["Ten un plan de recuperación (copia de la EEPROM) antes de empezar."],
+      "links": [
+        { "title": "ENDGAME (ConsoleMods)", "url": "https://consolemods.org/wiki/ENDGAME" },
+        { "title": "Xbox (ConsoleMods)", "url": "https://consolemods.org/wiki/Xbox" }
+      ]
     },
     {
       "id": "classicmini-hakchi",
@@ -400,14 +472,15 @@
       "consoleIds": ["nesclassic"],
       "difficulty": "facil",
       "time": "20 min",
-      "summary": "hakchi2 CE se instala desde el PC por USB y te deja añadir tus juegos y emuladores a la consola.",
+      "summary": "hakchi2 CE se instala desde el PC por USB (modo FEL) y te deja añadir tus juegos y emuladores.",
       "requirements": ["NES o SNES Classic Mini", "Cable micro-USB de datos", "PC con Windows"],
       "steps": [
-        { "title": "Instala hakchi2 CE", "text": "Descarga hakchi2 CE desde su GitHub e instálalo en el PC." },
-        { "title": "Modo FEL", "text": "Conecta la consola al PC, mantén pulsado Reset y enciende. Suelta Reset cuando hakchi detecte la consola." },
-        { "title": "Instala y añade juegos", "text": "En hakchi: Kernel > Install / Repair. Luego añade tus copias de seguridad y pulsa 'Sincronizar'." }
+        { "title": "Instala hakchi2 CE", "text": "Descárgalo de su GitHub e instálalo en el PC." },
+        { "title": "Modo FEL", "text": "Conecta la consola al PC, mantén pulsado Reset y enciende. Suelta cuando hakchi la detecte." },
+        { "title": "Instala el kernel", "text": "En hakchi: Kernel > Install / Repair. Guarda la copia del kernel original cuando te lo ofrezca." },
+        { "title": "Añade juegos", "text": "Añade tus copias de seguridad y pulsa 'Sincronizar'." }
       ],
-      "warnings": ["Haz la copia del kernel original cuando hakchi te lo ofrezca."],
+      "warnings": ["Guarda la copia del kernel original."],
       "links": [{ "title": "hakchi2 CE (GitHub)", "url": "https://github.com/TeamShinkansen/Hakchi2-CE" }]
     },
     {
@@ -416,15 +489,15 @@
       "consoleIds": ["nes", "snes", "n64", "gbc", "gba", "genesis", "mastersystem", "gamegear", "atari2600", "jaguar"],
       "difficulty": "facil",
       "time": "10 min",
-      "summary": "Estas consolas no tienen firmware que hackear. Un flashcart es un cartucho con ranura microSD: copias en la tarjeta homebrew y copias de tus juegos y lo usas como un cartucho normal.",
-      "requirements": ["Un flashcart compatible (EverDrive, FXPak Pro, SummerCart64, EZ-Flash, Harmony, GameDrive…)", "Tarjeta microSD", "PC"],
+      "summary": "No tienen firmware que hackear. Un flashcart es un cartucho con ranura microSD: copias homebrew y copias de tus cartuchos y lo usas como uno normal.",
+      "requirements": ["Flashcart de un fabricante conocido (EverDrive, FXPak Pro, SummerCart64, EZ-Flash, Harmony, GameDrive…)", "microSD", "PC"],
       "steps": [
-        { "title": "Elige el flashcart", "text": "Compra uno de un fabricante conocido (Krikzz, EZ-Flash, etc.) y desconfía de clones muy baratos." },
-        { "title": "Prepara la microSD", "text": "Formatéala en FAT32 o exFAT y copia el sistema (OS) del flashcart siguiendo su manual." },
-        { "title": "Añade juegos", "text": "Copia tus copias de seguridad (extraídas de tus cartuchos) o homebrew en una carpeta de la microSD." },
-        { "title": "Juega", "text": "Inserta el flashcart como un cartucho, enciende y elige el juego en el menú." }
+        { "title": "Elige el flashcart", "text": "Compra uno de un fabricante conocido (Krikzz, EZ-Flash…) y desconfía de clones muy baratos." },
+        { "title": "Prepara la microSD", "text": "Formatéala en FAT32 o exFAT y copia el sistema (OS) del flashcart según su manual." },
+        { "title": "Añade juegos", "text": "Copia tus copias de seguridad (extraídas de tus cartuchos) o homebrew en una carpeta." },
+        { "title": "Juega", "text": "Inserta el flashcart, enciende y elige el juego." }
       ],
-      "warnings": ["Asegúrate de que el flashcart es compatible con la región y el modelo de tu consola."],
+      "warnings": ["Comprueba que el flashcart es compatible con tu modelo y región."],
       "links": []
     },
     {
@@ -433,14 +506,14 @@
       "consoleIds": ["ps1", "saturn", "dreamcast"],
       "difficulty": "media",
       "time": "30 min – 1 hora",
-      "summary": "En consolas de CD lo más cómodo es un ODE (emulador de lector óptico) que carga los juegos desde una tarjeta SD. También hay métodos sin abrir: FreePSXBoot (PS1), Saroo/Pseudo Saturn (Saturn) o CD-R por MIL-CD (Dreamcast).",
-      "requirements": ["ODE para tu consola (xStation/PSIO, Fenrir/Rhea/Phoebe, GDEMU/MODE) o el método sin abrir de tu consola", "Tarjeta SD/microSD"],
+      "summary": "Lo más cómodo es un ODE (emulador del lector óptico) que carga desde una SD. Sin abrir la consola: FreePSXBoot (PS1), Saroo o Pseudo Saturn Kai (Saturn) o CD-R por el fallo MIL-CD (Dreamcast).",
+      "requirements": ["ODE para tu consola (xStation/PSIO, Fenrir/Rhea/Phoebe, GDEMU/MODE) o el método sin abrir", "Tarjeta SD/microSD"],
       "steps": [
-        { "title": "Sin abrir la consola", "text": "PS1: graba FreePSXBoot en una memory card con un PC y adaptador. Saturn: usa el cartucho Saroo o Pseudo Saturn Kai. Dreamcast: la mayoría de modelos leen CD-R grabados (formato CDI) gracias al fallo MIL-CD." },
-        { "title": "Con ODE", "text": "Instala el ODE en lugar del lector (algunos no requieren soldar). Copia tus copias de seguridad en la SD." },
-        { "title": "Juega", "text": "Enciende la consola y elige el juego en el menú del ODE o del cargador." }
+        { "title": "Sin abrir la consola", "text": "PS1: graba FreePSXBoot en una memory card con un PC y adaptador. Saturn: cartucho Saroo o Pseudo Saturn Kai. Dreamcast: casi todos los modelos leen CD-R en formato CDI." },
+        { "title": "Con ODE", "text": "Instala el ODE en lugar del lector (algunos sin soldar) y copia tus copias de seguridad a la SD." },
+        { "title": "Juega", "text": "Enciende y elige el juego en el menú del ODE o del cargador." }
       ],
-      "warnings": ["Las últimas Dreamcast (2001) no leen CD-R: necesitan un ODE."],
+      "warnings": ["Las últimas Dreamcast (2001) no leen CD-R: necesitan ODE."],
       "links": [{ "title": "FreePSXBoot (GitHub)", "url": "https://github.com/brad-lin/FreePSXBoot" }]
     }
   ]

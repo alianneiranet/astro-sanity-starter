@@ -32,6 +32,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val settingsStore = SettingsStore.get(application)
 
     val brands = repository.bundled.brands.sortedBy { it.order }
+    val guidesReviewedAt: String = repository.guidesReviewedAt
+
     val guides: StateFlow<List<Guide>> = repository.guides()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), repository.bundledGuides)
     val logoIds: Set<String> = repository.logoIds

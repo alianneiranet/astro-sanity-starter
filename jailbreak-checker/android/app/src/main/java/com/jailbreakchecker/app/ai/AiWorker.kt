@@ -41,7 +41,7 @@ class AiWorker(context: Context, params: WorkerParameters) : CoroutineWorker(con
         val store = LocalStore.get(applicationContext)
         val repo = Repository(applicationContext)
         val runner = if (settings.hasApiKey) ClaudeRunner(settings.apiKey, settings.model) else null
-        val updater = Updater(store, repo.bundled.consoles, repo.bundledGuides, runner)
+        val updater = Updater(store, repo.bundled.consoles, repo.bundledGuides, runner, repo.guidesReviewedAt)
         val consoleId = inputData.getString(KEY_CONSOLE)
         val guideId = inputData.getString(KEY_GUIDE)
 

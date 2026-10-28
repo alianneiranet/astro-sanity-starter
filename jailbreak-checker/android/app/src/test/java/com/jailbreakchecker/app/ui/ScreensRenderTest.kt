@@ -113,7 +113,7 @@ class ScreensRenderTest {
 
     @Test
     fun guide() {
-        show { GuideScreen(guides["switch-rcm"], true, false, {}, {}, {}) }
+        show { GuideScreen(guides["switch-rcm"], "2026-10-28", true, false, {}, {}, {}) }
         compose.onNodeWithText("Qué necesitas").assertExists()
         snapshot("guide-switch-rcm")
     }

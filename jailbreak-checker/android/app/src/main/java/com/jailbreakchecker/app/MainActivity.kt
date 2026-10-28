@@ -102,6 +102,7 @@ private fun AppNavigation(viewModel: MainViewModel) {
             val guideId = entry.arguments?.getString("guideId").orEmpty()
             GuideScreen(
                 guide = guides[guideId],
+                reviewedAt = viewModel.guidesReviewedAt,
                 hasApiKey = settings.hasApiKey,
                 updating = guideId in updatingGuides,
                 onUpdate = { viewModel.updateGuides(listOf(guideId)) },

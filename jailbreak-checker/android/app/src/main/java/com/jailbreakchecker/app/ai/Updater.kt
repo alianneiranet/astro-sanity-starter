@@ -23,8 +23,9 @@ class Updater(
     private val bundled: List<ConsoleInfo>,
     private val bundledGuides: List<Guide>,
     private val runner: Researcher?,
+    private val guidesReviewedAt: String = "",
 ) {
-    private val guides: List<Guide> get() = Repository.mergeGuides(bundledGuides, store.state.value)
+    private val guides: List<Guide> get() = Repository.mergeGuides(bundledGuides, store.state.value, guidesReviewedAt)
 
     private fun requireRunner(): Researcher = runner ?: throw IllegalStateException("Sin API key")
 
